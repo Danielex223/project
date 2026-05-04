@@ -1531,7 +1531,7 @@
         <div class="topbar-title" id="topbar-title">Dashboard</div>
         <div class="topbar-actions">
           <button class="btn btn-primary" onclick="showModal()" style="padding:8px 16px;font-size:13px;">+ New Task</button>
-          <div class="icon-btn" onclick="toggleNotif()">🔔<div class="notif-dot"></div></div>
+          <div class="icon-btn" onclick="toggleNotif()">🔔<div class="notif-dot"></div><span id="notif-count" style="position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border-radius:10px;min-width:18px;height:18px;padding:0 5px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;">0</span></div>
         </div>
       </div>
 
@@ -2102,9 +2102,38 @@
     if (task.done) return { label: `Completed ${new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, className: '' };
     const diffDays = Math.ceil((new Date(task.dueDate) - TODAY) / DAY_MS);
     if (diffDays < 0) return { label: `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'}`, className: 'overdue' };
-    if (diffDays <= 2) return { label: `Due Soon · ${diffDays === 0 ? 'Today' : `${diffDays} day${diffDays === 1 ? '' : 's'}`}`, className: 'overdue' };
-    const dueLabel = new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return { label: `Due ${dueLabel}`, className: '' };
+    if (diffDays === 0) return { label: 'Due today', className: 'overdue' };
+    return { label: `Due in ${diffDays} day${diffDays === 1 ? '' : 's'}`, className: diffDays <= 2 ? 'overdue' : '' };
+  }
+
+  function getDeadlineChip(diffDays) {
+    if (diffDays < 0) return { text: `Overdue ${Math.abs(diffDays)}d`, chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays === 0) return { text: 'Today', chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays === 1) return { text: 'Tomorrow', chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays <= 7) return { text: `${diffDays} days`, chipClass: 'chip-amber', dotColor: 'var(--amber)' };
+    return { text: `${diffDays} days`, chipClass: 'chip-green', dotColor: 'var(--green)' };
+  }
+
+  function renderDeadlines() {
+    const upcomingTasks = tasks
+      .filter(task => !task.done)
+      .map(task => ({ ...task, diffDays: Math.ceil((new Date(task.dueDate) - TODAY) / DAY_MS) }))
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+    const deadlineMarkup = upcomingTasks.map(task => {
+      const dueDate = new Date(task.dueDate);
+      const chip = getDeadlineChip(task.diffDays);
+      return `<div class="timeline-item">
+        <div class="timeline-date"><div class="tl-day">${String(dueDate.getDate()).padStart(2, '0')}</div><div class="tl-month">${dueDate.toLocaleDateString('en-US', { month: 'short' })}</div></div>
+        <div class="timeline-dot" style="background:${chip.dotColor}"></div>
+        <div class="tl-content"><div class="tl-title">${task.name}</div><div class="tl-group">${GROUP_LABELS[task.groupId] || 'Group'} · ${task.tag}</div></div>
+        <span class="chip ${chip.chipClass}">${chip.text}</span>
+      </div>`;
+    }).join('');
+
+    const emptyState = '<div style="padding:8px 0;color:var(--muted);font-size:12px;">No upcoming deadlines.</div>';
+    document.getElementById('dashboard-deadlines').innerHTML = deadlineMarkup || emptyState;
+    document.getElementById('deadlines-page-list').innerHTML = deadlineMarkup || emptyState;
   }
 
   function getDeadlineChip(diffDays) {
@@ -2143,7 +2172,7 @@
       <div class="task-checkbox ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">${task.done ? '✓' : ''}</div>
       <div class="task-content">
         <div class="task-name ${task.done ? 'done' : ''}">${task.name}</div>
-        <div class="task-meta"><span class="task-due ${getTaskDueState(task).className}">${getTaskDueState(task).label}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span><span style="font-size:11px;color:var(--muted)">${GROUP_LABELS[task.groupId]}</span></div>
+        <div class="task-meta"><span class="task-due ${getTaskDueState(task).className}">${getTaskDueState(task).label}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span><span style="font-size:11px;color:var(--muted)">${GROUP_LABELS[task.groupId] || 'Unassigned group'}</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;"><div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="deleteTask(${task.id})">Delete</button></div>
     </div>`).join('');
@@ -2167,9 +2196,9 @@
 
   function updateContributionUI() {
     const completed = tasks.filter(t => t.done).length;
-    const pct = Math.min(95, 20 + score * 3);
+    const incompleteTasks = tasks.filter(t => !t.done).length;
     document.getElementById('metric-completed').textContent = String(completed);
-    document.getElementById('metric-contribution').textContent = `${pct}%`;
+    document.getElementById('notif-count').textContent = String(incompleteTasks);
 
     const counts = tasks.reduce((acc, task) => {
       const key = task.assignee || 'U';
@@ -2192,6 +2221,8 @@
         </div>`;
       }).join('');
     document.getElementById('contrib-list').innerHTML = rows || '<div style="font-size:12px;color:var(--muted);">No task data yet.</div>';
+    const youShare = Math.round(((counts.D || 0) / total) * 100);
+    document.getElementById('metric-contribution').textContent = `${youShare}%`;
     const max = Math.max(...Object.values(counts), 0);
     const min = Math.min(...Object.values(counts), max);
     const balanced = max - min <= 1;
