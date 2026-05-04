@@ -2136,6 +2136,36 @@
     document.getElementById('deadlines-page-list').innerHTML = deadlineMarkup || emptyState;
   }
 
+  function getDeadlineChip(diffDays) {
+    if (diffDays < 0) return { text: `Overdue ${Math.abs(diffDays)}d`, chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays === 0) return { text: 'Today', chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays === 1) return { text: 'Tomorrow', chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays <= 7) return { text: `${diffDays} days`, chipClass: 'chip-amber', dotColor: 'var(--amber)' };
+    return { text: `${diffDays} days`, chipClass: 'chip-green', dotColor: 'var(--green)' };
+  }
+
+  function renderDeadlines() {
+    const upcomingTasks = tasks
+      .filter(task => !task.done)
+      .map(task => ({ ...task, diffDays: Math.ceil((new Date(task.dueDate) - TODAY) / DAY_MS) }))
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+    const deadlineMarkup = upcomingTasks.map(task => {
+      const dueDate = new Date(task.dueDate);
+      const chip = getDeadlineChip(task.diffDays);
+      return `<div class="timeline-item">
+        <div class="timeline-date"><div class="tl-day">${String(dueDate.getDate()).padStart(2, '0')}</div><div class="tl-month">${dueDate.toLocaleDateString('en-US', { month: 'short' })}</div></div>
+        <div class="timeline-dot" style="background:${chip.dotColor}"></div>
+        <div class="tl-content"><div class="tl-title">${task.name}</div><div class="tl-group">${GROUP_LABELS[task.groupId] || 'Group'} · ${task.tag}</div></div>
+        <span class="chip ${chip.chipClass}">${chip.text}</span>
+      </div>`;
+    }).join('');
+
+    const emptyState = '<div style="padding:8px 0;color:var(--muted);font-size:12px;">No upcoming deadlines.</div>';
+    document.getElementById('dashboard-deadlines').innerHTML = deadlineMarkup || emptyState;
+    document.getElementById('deadlines-page-list').innerHTML = deadlineMarkup || emptyState;
+  }
+
   function renderTasks() {
     const markup = tasks.map(task => `<div class="task-item">
       <div class="priority priority-${task.priority}"></div>
