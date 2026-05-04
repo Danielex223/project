@@ -1547,7 +1547,7 @@
         <div class="metrics-row">
           <div class="metric-card">
             <div class="metric-icon" style="background:#e8eeff;">📁</div>
-            <div class="metric-value">3</div>
+            <div class="metric-value" id="metric-groups">3</div>
             <div class="metric-label">Active groups</div>
             <div class="metric-change change-up">↑ 1 new this week</div>
           </div>
@@ -1559,9 +1559,9 @@
           </div>
           <div class="metric-card">
             <div class="metric-icon" style="background:#fef3c7;">⏰</div>
-            <div class="metric-value">3</div>
+            <div class="metric-value" id="metric-upcoming">0</div>
             <div class="metric-label">Upcoming deadlines</div>
-            <div class="metric-change change-down">Next in 6 days</div>
+            <div class="metric-change change-down" id="metric-next-deadline">No upcoming due dates</div>
           </div>
           <div class="metric-card">
             <div class="metric-icon" style="background:#fee2e2;">🎯</div>
@@ -1964,30 +1964,7 @@
     Notifications
     <span style="font-size:11px;color:var(--accent);cursor:pointer;font-weight:500;">Mark all read</span>
   </div>
-  <div class="notif-item" style="display:flex;gap:10px;">
-    <div class="notif-dot-l"></div>
-    <div>
-      <div class="notif-item-title">Deadline tomorrow</div>
-      <div class="notif-item-body">Usability Test Report is due May 5th.</div>
-      <div class="notif-item-time">Just now</div>
-    </div>
-  </div>
-  <div class="notif-item" style="display:flex;gap:10px;">
-    <div class="notif-dot-l"></div>
-    <div>
-      <div class="notif-item-title">Maya sent a message</div>
-      <div class="notif-item-body">"You all are lifesavers 🙏 Good luck Daniel!"</div>
-      <div class="notif-item-time">2 hours ago</div>
-    </div>
-  </div>
-  <div class="notif-item" style="display:flex;gap:10px;">
-    <div style="width:8px;height:8px;flex-shrink:0;margin-top:4px;"></div>
-    <div>
-      <div class="notif-item-title" style="font-weight:400;color:var(--muted);">Aisha uploaded a file</div>
-      <div class="notif-item-body">Final Report Outline.docx added to GroupSync</div>
-      <div class="notif-item-time">Yesterday</div>
-    </div>
-  </div>
+  <div id="notif-list"></div>
 </div>
 
 <!-- New Task Modal -->
@@ -2136,34 +2113,34 @@
     document.getElementById('deadlines-page-list').innerHTML = deadlineMarkup || emptyState;
   }
 
-  function getDeadlineChip(diffDays) {
-    if (diffDays < 0) return { text: `Overdue ${Math.abs(diffDays)}d`, chipClass: 'chip-red', dotColor: 'var(--red)' };
-    if (diffDays === 0) return { text: 'Today', chipClass: 'chip-red', dotColor: 'var(--red)' };
-    if (diffDays === 1) return { text: 'Tomorrow', chipClass: 'chip-red', dotColor: 'var(--red)' };
-    if (diffDays <= 7) return { text: `${diffDays} days`, chipClass: 'chip-amber', dotColor: 'var(--amber)' };
-    return { text: `${diffDays} days`, chipClass: 'chip-green', dotColor: 'var(--green)' };
-  }
-
-  function renderDeadlines() {
-    const upcomingTasks = tasks
-      .filter(task => !task.done)
-      .map(task => ({ ...task, diffDays: Math.ceil((new Date(task.dueDate) - TODAY) / DAY_MS) }))
-      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-
-    const deadlineMarkup = upcomingTasks.map(task => {
-      const dueDate = new Date(task.dueDate);
-      const chip = getDeadlineChip(task.diffDays);
-      return `<div class="timeline-item">
-        <div class="timeline-date"><div class="tl-day">${String(dueDate.getDate()).padStart(2, '0')}</div><div class="tl-month">${dueDate.toLocaleDateString('en-US', { month: 'short' })}</div></div>
-        <div class="timeline-dot" style="background:${chip.dotColor}"></div>
-        <div class="tl-content"><div class="tl-title">${task.name}</div><div class="tl-group">${GROUP_LABELS[task.groupId] || 'Group'} · ${task.tag}</div></div>
-        <span class="chip ${chip.chipClass}">${chip.text}</span>
+  function renderNotifications() {
+    const pendingTasks = tasks.filter(t => !t.done).slice(0, 5);
+    const items = pendingTasks.map(task => {
+      const due = getTaskDueState(task).label;
+      return `<div class="notif-item" style="display:flex;gap:10px;">
+        <div class="notif-dot-l"></div>
+        <div>
+          <div class="notif-item-title">${task.name}</div>
+          <div class="notif-item-body">${GROUP_LABELS[task.groupId] || 'Unassigned group'} · ${due}</div>
+          <div class="notif-item-time">Pending task</div>
+        </div>
       </div>`;
     }).join('');
+    document.getElementById('notif-list').innerHTML = items || '<div class="notif-item"><div class="notif-item-body">No pending notifications.</div></div>';
+  }
 
-    const emptyState = '<div style="padding:8px 0;color:var(--muted);font-size:12px;">No upcoming deadlines.</div>';
-    document.getElementById('dashboard-deadlines').innerHTML = deadlineMarkup || emptyState;
-    document.getElementById('deadlines-page-list').innerHTML = deadlineMarkup || emptyState;
+  function updateDashboardMetrics() {
+    const pending = tasks.filter(t => !t.done);
+    const uniqueGroups = new Set(tasks.map(t => t.groupId).filter(Boolean));
+    document.getElementById('metric-groups').textContent = String(uniqueGroups.size || Object.keys(GROUP_LABELS).length);
+    document.getElementById('metric-upcoming').textContent = String(pending.length);
+    if (!pending.length) {
+      document.getElementById('metric-next-deadline').textContent = 'No upcoming due dates';
+      return;
+    }
+    const soonest = pending.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
+    const days = Math.ceil((new Date(soonest.dueDate) - TODAY) / DAY_MS);
+    document.getElementById('metric-next-deadline').textContent = days <= 0 ? 'Due today' : `Next in ${days} day${days===1?'':'s'}`;
   }
 
   function renderTasks() {
@@ -2180,6 +2157,8 @@
     document.getElementById('tasks-page-list').innerHTML = markup;
     updateContributionUI();
     renderDeadlines();
+    updateDashboardMetrics();
+    renderNotifications();
   }
 
   function toggleTask(taskId) {
@@ -2257,6 +2236,7 @@
     document.getElementById('chat-messages').innerHTML = convo.messages.join('');
     const msgs = document.getElementById('chat-messages');
     msgs.scrollTop = msgs.scrollHeight;
+    renderNotifications();
   }
   function switchConversation(conversationId, el) {
     activeConversation = conversationId;
