@@ -786,6 +786,7 @@
   }
 
   .group-card:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(61,107,255,0.12); transform: translateY(-2px); }
+  .group-card:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; border-color: var(--accent); box-shadow: 0 4px 20px rgba(61,107,255,0.12); transform: translateY(-2px); }
 
   .group-card-header {
     display: flex;
@@ -1277,6 +1278,7 @@
               <circle class="ring-fill" cx="26" cy="26" r="22" stroke-dasharray="138.2" stroke-dashoffset="34.5"/>
             </svg>
             <div class="ring-label">75%</div>
+            <button class="btn btn-outline" style="padding:6px 12px;font-size:12px;" onclick="inviteToGroup()">+ Invite</button>
           </div>
           <div>
             <div style="font-size:12px;font-weight:700;">3 of 4<br>done</div>
@@ -1648,35 +1650,7 @@
                 <div class="card-title">Upcoming Deadlines</div>
                 <div class="card-action" onclick="showPage('deadlines', null)">View all →</div>
               </div>
-              <div class="timeline">
-                <div class="timeline-item">
-                  <div class="timeline-date"><div class="tl-day">05</div><div class="tl-month">May</div></div>
-                  <div class="timeline-dot" style="background:var(--red)"></div>
-                  <div class="tl-content">
-                    <div class="tl-title">Usability Test Report</div>
-                    <div class="tl-group">HCI Final — GroupSync</div>
-                  </div>
-                  <span class="chip chip-red">Tomorrow</span>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-date"><div class="tl-day">10</div><div class="tl-month">May</div></div>
-                  <div class="timeline-dot" style="background:var(--amber)"></div>
-                  <div class="tl-content">
-                    <div class="tl-title">Final Report Draft</div>
-                    <div class="tl-group">HCI Final — GroupSync</div>
-                  </div>
-                  <span class="chip chip-amber">6 days</span>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-date"><div class="tl-day">14</div><div class="tl-month">May</div></div>
-                  <div class="timeline-dot" style="background:var(--green)"></div>
-                  <div class="tl-content">
-                    <div class="tl-title">Final Presentation</div>
-                    <div class="tl-group">GAME 324.101</div>
-                  </div>
-                  <span class="chip chip-green">10 days</span>
-                </div>
-              </div>
+              <div class="timeline" id="dashboard-deadlines"></div>
             </div>
 
             <div class="card">
@@ -1715,7 +1689,7 @@
           <button class="btn btn-primary" style="padding:9px 18px;font-size:13px;">+ Join / Create</button>
         </div>
         <div class="three-col">
-          <div class="group-card">
+          <div class="group-card" role="button" tabindex="0" aria-label="Open GroupSync — HCI Project conversation" onclick="openGroupConversation('groupsync')" onkeydown="activateGroupCard(event, 'groupsync')">
             <div class="group-card-header">
               <div class="group-emoji">🖥️</div>
               <span class="chip chip-red">Due soon</span>
@@ -1733,7 +1707,7 @@
               <span style="font-size:12px;color:var(--muted);">75% done</span>
             </div>
           </div>
-          <div class="group-card">
+          <div class="group-card" role="button" tabindex="0" aria-label="Open Market Analysis Report conversation" onclick="openGroupConversation('market')" onkeydown="activateGroupCard(event, 'market')">
             <div class="group-card-header">
               <div class="group-emoji">📈</div>
               <span class="chip chip-amber">In progress</span>
@@ -1750,7 +1724,7 @@
               <span style="font-size:12px;color:var(--muted);">40% done</span>
             </div>
           </div>
-          <div class="group-card">
+          <div class="group-card" role="button" tabindex="0" aria-label="Open Game Design Prototype conversation" onclick="openGroupConversation('gamedesign')" onkeydown="activateGroupCard(event, 'gamedesign')">
             <div class="group-card-header">
               <div class="group-emoji">🎮</div>
               <span class="chip chip-green">On track</span>
@@ -1866,62 +1840,7 @@
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">May 2026</div></div>
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">05</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--red)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Usability Test Report Submission</div>
-                <div class="tl-group">GroupSync — GAME 324.101</div>
-              </div>
-              <span class="chip chip-red">Tomorrow</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">07</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--amber)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Annotated Wireframe Submission</div>
-                <div class="tl-group">GroupSync — GAME 324.101</div>
-              </div>
-              <span class="chip chip-amber">3 days</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">10</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--amber)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Final Report Draft Due</div>
-                <div class="tl-group">GroupSync — GAME 324.101</div>
-              </div>
-              <span class="chip chip-amber">6 days</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">12</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--green)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Market Analysis Peer Review</div>
-                <div class="tl-group">BUSI 210</div>
-              </div>
-              <span class="chip chip-green">8 days</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">14</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--green)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Final Presentation Day</div>
-                <div class="tl-group">GAME 324.101 · Last day of semester</div>
-              </div>
-              <span class="chip chip-green">10 days</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">14</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--green)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Game Prototype Final Build</div>
-                <div class="tl-group">GAME 301</div>
-              </div>
-              <span class="chip chip-green">10 days</span>
-            </div>
-          </div>
+          <div class="timeline" id="deadlines-page-list"></div>
         </div>
       </div>
 
@@ -1936,21 +1855,21 @@
         <div class="chat-layout">
           <div class="chat-sidebar">
             <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">Conversations</div>
-            <div class="chat-conv-item active" data-conv-id="groupsync" onclick="switchConversation('groupsync', this)">
+            <div class="chat-conv-item active" role="button" tabindex="0" data-conv-id="groupsync" onclick="switchConversation('groupsync', this)" onkeydown="activateConversation(event, 'groupsync', this)">
               <div class="conv-icon">🖥️</div>
               <div>
                 <div class="conv-name">GroupSync Team</div>
                 <div class="conv-preview">On it! Will push tonight 🙌</div>
               </div>
             </div>
-            <div class="chat-conv-item" data-conv-id="market" onclick="switchConversation('market', this)">
+            <div class="chat-conv-item" role="button" tabindex="0" data-conv-id="market" onclick="switchConversation('market', this)" onkeydown="activateConversation(event, 'market', this)">
               <div class="conv-icon">📈</div>
               <div>
                 <div class="conv-name">Market Analysis</div>
                 <div class="conv-preview">Who's doing the slides?</div>
               </div>
             </div>
-            <div class="chat-conv-item" data-conv-id="gamedesign" onclick="switchConversation('gamedesign', this)">
+            <div class="chat-conv-item" role="button" tabindex="0" data-conv-id="gamedesign" onclick="switchConversation('gamedesign', this)" onkeydown="activateConversation(event, 'gamedesign', this)">
               <div class="conv-icon">🎮</div>
               <div>
                 <div class="conv-name">Game Design Crew</div>
@@ -2195,10 +2114,10 @@
   const TODAY = new Date('2026-05-04T00:00:00');
   const DAY_MS = 24 * 60 * 60 * 1000;
   const DEFAULT_TASKS = [
-    { id: 1, name: 'Finalize usability test report', dueDate: '2026-05-03', tag: 'Research', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 2, name: 'Annotate wireframes with HCI principles', dueDate: '2026-05-07', tag: 'Design', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 3, name: 'Draft final report intro section', dueDate: '2026-05-10', tag: 'Writing', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 4, name: 'Conduct user interviews (5 participants)', dueDate: '2026-04-28', tag: 'Research', priority: 'low', done: true, assignee: 'D', color: '#3d6bff' }
+    { id: 1, groupId: 'groupsync', name: 'Finalize usability test report', dueDate: '2026-05-03', tag: 'Research', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
+    { id: 2, groupId: 'groupsync', name: 'Annotate wireframes with HCI principles', dueDate: '2026-05-07', tag: 'Design', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
+    { id: 3, groupId: 'market', name: 'Draft positioning section', dueDate: '2026-05-10', tag: 'Writing', priority: 'med', done: false, assignee: 'K', color: '#8b5cf6' },
+    { id: 4, groupId: 'gamedesign', name: 'Conduct playtest with 5 students', dueDate: '2026-05-08', tag: 'Research', priority: 'low', done: true, assignee: 'R', color: '#10b981' }
   ];
   const DEFAULT_CONVERSATIONS = {
     groupsync: {
@@ -2218,7 +2137,9 @@
   let tasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.tasks) || 'null') || DEFAULT_TASKS;
   let conversations = JSON.parse(localStorage.getItem(STORAGE_KEYS.messages) || 'null') || DEFAULT_CONVERSATIONS;
   let activeConversation = 'groupsync';
+  let activeGroup = 'groupsync';
   let score = Number(localStorage.getItem(STORAGE_KEYS.score) || 8);
+  const GROUP_LABELS = { groupsync: 'GroupSync Team', market: 'Market Analysis', gamedesign: 'Game Design Crew' };
 
   function smoothScroll(id) { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
   function openApp() { document.getElementById('landing').style.display = 'none'; document.getElementById('app').style.display = 'block'; }
@@ -2249,19 +2170,50 @@
     return { label: `Due ${dueLabel}`, className: '' };
   }
 
+  function getDeadlineChip(diffDays) {
+    if (diffDays < 0) return { text: `Overdue ${Math.abs(diffDays)}d`, chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays === 0) return { text: 'Today', chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays === 1) return { text: 'Tomorrow', chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays <= 7) return { text: `${diffDays} days`, chipClass: 'chip-amber', dotColor: 'var(--amber)' };
+    return { text: `${diffDays} days`, chipClass: 'chip-green', dotColor: 'var(--green)' };
+  }
+
+  function renderDeadlines() {
+    const upcomingTasks = tasks
+      .filter(task => !task.done)
+      .map(task => ({ ...task, diffDays: Math.ceil((new Date(task.dueDate) - TODAY) / DAY_MS) }))
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+    const deadlineMarkup = upcomingTasks.map(task => {
+      const dueDate = new Date(task.dueDate);
+      const chip = getDeadlineChip(task.diffDays);
+      return `<div class="timeline-item">
+        <div class="timeline-date"><div class="tl-day">${String(dueDate.getDate()).padStart(2, '0')}</div><div class="tl-month">${dueDate.toLocaleDateString('en-US', { month: 'short' })}</div></div>
+        <div class="timeline-dot" style="background:${chip.dotColor}"></div>
+        <div class="tl-content"><div class="tl-title">${task.name}</div><div class="tl-group">${GROUP_LABELS[task.groupId] || 'Group'} · ${task.tag}</div></div>
+        <span class="chip ${chip.chipClass}">${chip.text}</span>
+      </div>`;
+    }).join('');
+
+    const emptyState = '<div style="padding:8px 0;color:var(--muted);font-size:12px;">No upcoming deadlines.</div>';
+    document.getElementById('dashboard-deadlines').innerHTML = deadlineMarkup || emptyState;
+    document.getElementById('deadlines-page-list').innerHTML = deadlineMarkup || emptyState;
+  }
+
   function renderTasks() {
-    const markup = tasks.map(task => `<div class="task-item">
+    const markup = tasks.filter(task => task.groupId === activeGroup).map(task => `<div class="task-item">
       <div class="priority priority-${task.priority}"></div>
       <div class="task-checkbox ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">${task.done ? '✓' : ''}</div>
       <div class="task-content">
         <div class="task-name ${task.done ? 'done' : ''}">${task.name}</div>
-        <div class="task-meta"><span class="task-due ${getTaskDueState(task).className}">${getTaskDueState(task).label}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span></div>
+        <div class="task-meta"><span class="task-due ${getTaskDueState(task).className}">${getTaskDueState(task).label}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span><span style="font-size:11px;color:var(--muted)">${GROUP_LABELS[task.groupId]}</span></div>
       </div>
-      <div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;"><div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="deleteTask(${task.id})">Delete</button></div>
     </div>`).join('');
     document.getElementById('dashboard-task-list').innerHTML = markup;
     document.getElementById('tasks-page-list').innerHTML = markup;
     updateContributionUI();
+    renderDeadlines();
   }
 
   function toggleTask(taskId) {
@@ -2270,6 +2222,10 @@
     if (task.done) { score += SCORE_WEIGHTS.complete; showToast('✅ Task marked complete!'); }
     else { score = Math.max(0, score - SCORE_WEIGHTS.complete); showToast('↩️ Task reopened'); }
     saveState(); renderTasks();
+  }
+  function deleteTask(taskId) {
+    tasks = tasks.filter(t => t.id !== taskId);
+    saveState(); renderTasks(); showToast('🗑️ Task deleted');
   }
 
   function updateContributionUI() {
@@ -2288,7 +2244,7 @@
   function closeModalOnBg(e) { if (e.target === document.getElementById('task-modal')) closeModal(); }
   function createTask() {
     const name = document.querySelector('#task-modal .form-input')?.value.trim() || `New task ${tasks.length + 1}`;
-    tasks.unshift({ id: Date.now(), name, dueDate: new Date(TODAY.getTime() + DAY_MS).toISOString().split('T')[0], tag: 'Research', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' });
+    tasks.unshift({ id: Date.now(), groupId: activeGroup, name, dueDate: new Date(TODAY.getTime() + DAY_MS).toISOString().split('T')[0], tag: 'Research', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' });
     score += SCORE_WEIGHTS.create;
     saveState(); renderTasks(); closeModal(); showToast('✅ Task created successfully!');
   }
@@ -2305,9 +2261,35 @@
   }
   function switchConversation(conversationId, el) {
     activeConversation = conversationId;
+    activeGroup = conversationId;
     document.querySelectorAll('.chat-conv-item').forEach(item => item.classList.remove('active'));
     if (el) el.classList.add('active');
     renderMessages();
+    renderTasks();
+  }
+
+
+  function activateConversation(e, conversationId, element){
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      switchConversation(conversationId, element);
+    }
+  }
+
+  function activateGroupCard(e, conversationId){
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openGroupConversation(conversationId);
+    }
+  }
+
+  function openGroupConversation(conversationId){
+    showPage('chat', document.querySelector('.nav-item[onclick*="showPage(\'chat\'"]'));
+    const conversation = document.querySelector(`.chat-conv-item[data-conv-id="${conversationId}"]`);
+    if (conversation) {
+      switchConversation(conversationId, conversation);
+      conversation.focus();
+    }
   }
 
   function sendMsg(e) {
@@ -2321,6 +2303,15 @@
     conversations[activeConversation].messages = Array.from(msgs.children).map(n => n.outerHTML);
     score += SCORE_WEIGHTS.message; saveState(); updateContributionUI();
     input.value = ''; msgs.scrollTop = msgs.scrollHeight;
+  }
+  function inviteToGroup() {
+    const name = prompt(`Invite to ${conversations[activeConversation].name}: enter a name`);
+    if (!name) return;
+    const convo = conversations[activeConversation];
+    const currentMembers = Number((convo.meta.match(/^(\\d+)/) || [4])[1]);
+    convo.meta = `${currentMembers + 1} members · ${convo.meta.split('·')[1].trim()}`;
+    convo.messages.push(`<div class="msg-row"><div class="avatar-sm" style="background:#6b7280">S</div><div class="msg-body"><div class="msg-sender">System</div><div class="msg-bubble">${name} was invited to ${convo.name}.</div><div class="msg-time">Just now</div></div></div>`);
+    saveState(); renderMessages(); showToast(`✉️ Invited ${name}`);
   }
 
   function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
