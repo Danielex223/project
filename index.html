@@ -1944,75 +1944,12 @@
           </div>
         </div>
         <div class="two-col">
-          <div class="card">
+          <div class="card" style="grid-column:1 / -1;">
             <div class="card-header">
-              <div class="card-title">GroupSync Team — HCI Project</div>
-              <span class="chip chip-green">Balanced</span>
+              <div class="card-title">Live Team Contributions</div>
+              <span class="chip chip-amber" id="contrib-balance-chip">Tracking</span>
             </div>
-            <div style="padding:16px 20px;">
-              <div class="contrib-bar">
-                <div class="avatar-sm" style="background:#3d6bff;flex-shrink:0">D</div>
-                <div class="contrib-name">Daniel (You)</div>
-                <div class="contrib-track"><div class="contrib-fill" style="width:32%;background:#3d6bff"></div></div>
-                <div class="contrib-pct" id="contrib-you-pct">32%</div>
-                <div class="contrib-tasks" id="contrib-you-score">8 tasks</div>
-              </div>
-              <div class="contrib-bar">
-                <div class="avatar-sm" style="background:#f59e0b;flex-shrink:0">M</div>
-                <div class="contrib-name">Maya</div>
-                <div class="contrib-track"><div class="contrib-fill" style="width:28%;background:#f59e0b"></div></div>
-                <div class="contrib-pct">28%</div>
-                <div class="contrib-tasks">7 tasks</div>
-              </div>
-              <div class="contrib-bar">
-                <div class="avatar-sm" style="background:#1db877;flex-shrink:0">J</div>
-                <div class="contrib-name">James</div>
-                <div class="contrib-track"><div class="contrib-fill" style="width:24%;background:#1db877"></div></div>
-                <div class="contrib-pct">24%</div>
-                <div class="contrib-tasks">6 tasks</div>
-              </div>
-              <div class="contrib-bar">
-                <div class="avatar-sm" style="background:#ef4444;flex-shrink:0">A</div>
-                <div class="contrib-name">Aisha</div>
-                <div class="contrib-track"><div class="contrib-fill" style="width:16%;background:#ef4444"></div></div>
-                <div class="contrib-pct">16%</div>
-                <div class="contrib-tasks">4 tasks</div>
-              </div>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:18px;">
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title">Market Analysis Team</div>
-                <span class="chip chip-amber">Uneven</span>
-              </div>
-              <div style="padding:16px 20px;">
-                <div class="contrib-bar">
-                  <div class="avatar-sm" style="background:#3d6bff;flex-shrink:0">D</div>
-                  <div class="contrib-name">Daniel (You)</div>
-                  <div class="contrib-track"><div class="contrib-fill" style="width:55%;background:#3d6bff"></div></div>
-                  <div class="contrib-pct">55%</div>
-                  <div class="contrib-tasks">6 tasks</div>
-                </div>
-                <div class="contrib-bar">
-                  <div class="avatar-sm" style="background:#8b5cf6;flex-shrink:0">K</div>
-                  <div class="contrib-name">Kira</div>
-                  <div class="contrib-track"><div class="contrib-fill" style="width:30%;background:#8b5cf6"></div></div>
-                  <div class="contrib-pct">30%</div>
-                  <div class="contrib-tasks">3 tasks</div>
-                </div>
-                <div class="contrib-bar">
-                  <div class="avatar-sm" style="background:#06b6d4;flex-shrink:0">T</div>
-                  <div class="contrib-name">Tyler</div>
-                  <div class="contrib-track"><div class="contrib-fill" style="width:15%;background:#06b6d4"></div></div>
-                  <div class="contrib-pct" style="color:var(--red)">15%</div>
-                  <div class="contrib-tasks">2 tasks</div>
-                </div>
-                <div style="background:var(--red-soft);border-radius:8px;padding:10px 12px;margin-top:12px;font-size:12px;color:var(--red);font-weight:500;">
-                  ⚠️ Workload imbalance detected. Consider reassigning tasks.
-                </div>
-              </div>
-            </div>
+            <div style="padding:16px 20px;" id="contrib-list"></div>
           </div>
         </div>
       </div>
@@ -2233,8 +2170,34 @@
     const pct = Math.min(95, 20 + score * 3);
     document.getElementById('metric-completed').textContent = String(completed);
     document.getElementById('metric-contribution').textContent = `${pct}%`;
-    document.getElementById('contrib-you-pct').textContent = `${pct}%`;
-    document.getElementById('contrib-you-score').textContent = `${score} points`;
+
+    const counts = tasks.reduce((acc, task) => {
+      const key = task.assignee || 'U';
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+    const rows = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([assignee, count]) => {
+        const share = Math.round((count / total) * 100);
+        const color = tasks.find(t => t.assignee === assignee)?.color || '#6b7280';
+        const name = assignee === 'D' ? 'Daniel (You)' : `Member ${assignee}`;
+        return `<div class="contrib-bar">
+          <div class="avatar-sm" style="background:${color};flex-shrink:0">${assignee}</div>
+          <div class="contrib-name">${name}</div>
+          <div class="contrib-track"><div class="contrib-fill" style="width:${share}%;background:${color}"></div></div>
+          <div class="contrib-pct">${share}%</div>
+          <div class="contrib-tasks">${count} task${count === 1 ? '' : 's'}</div>
+        </div>`;
+      }).join('');
+    document.getElementById('contrib-list').innerHTML = rows || '<div style="font-size:12px;color:var(--muted);">No task data yet.</div>';
+    const max = Math.max(...Object.values(counts), 0);
+    const min = Math.min(...Object.values(counts), max);
+    const balanced = max - min <= 1;
+    const chip = document.getElementById('contrib-balance-chip');
+    chip.textContent = balanced ? 'Balanced' : 'Uneven';
+    chip.className = `chip ${balanced ? 'chip-green' : 'chip-amber'}`;
   }
 
   function toggleNotif() { document.getElementById('notif-panel').classList.toggle('show'); }
@@ -2271,30 +2234,6 @@
     if (el) el.classList.add('active');
     renderMessages();
     renderTasks();
-  }
-
-
-  function activateConversation(e, conversationId, element){
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      switchConversation(conversationId, element);
-    }
-  }
-
-  function activateGroupCard(e, conversationId){
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openGroupConversation(conversationId);
-    }
-  }
-
-  function openGroupConversation(conversationId){
-    showPage('chat', document.querySelector('.nav-item[onclick*="showPage(\'chat\'"]'));
-    const conversation = document.querySelector(`.chat-conv-item[data-conv-id="${conversationId}"]`);
-    if (conversation) {
-      switchConversation(conversationId, conversation);
-      conversation.focus();
-    }
   }
 
 
