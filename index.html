@@ -1278,6 +1278,7 @@
               <circle class="ring-fill" cx="26" cy="26" r="22" stroke-dasharray="138.2" stroke-dashoffset="34.5"/>
             </svg>
             <div class="ring-label">75%</div>
+            <button class="btn btn-outline" style="padding:6px 12px;font-size:12px;" onclick="inviteToGroup()">+ Invite</button>
           </div>
           <div>
             <div style="font-size:12px;font-weight:700;">3 of 4<br>done</div>
@@ -2082,10 +2083,10 @@
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Group</label>
-        <select class="form-select">
-          <option>GroupSync — HCI</option>
-          <option>Market Analysis</option>
-          <option>Game Design</option>
+        <select class="form-select" id="task-group">
+          <option value="groupsync">GroupSync — HCI</option>
+          <option value="market">Market Analysis</option>
+          <option value="gamedesign">Game Design</option>
         </select>
       </div>
       <div class="form-group">
@@ -2113,10 +2114,10 @@
   const TODAY = new Date('2026-05-04T00:00:00');
   const DAY_MS = 24 * 60 * 60 * 1000;
   const DEFAULT_TASKS = [
-    { id: 1, name: 'Finalize usability test report', dueDate: '2026-05-03', tag: 'Research', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 2, name: 'Annotate wireframes with HCI principles', dueDate: '2026-05-07', tag: 'Design', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 3, name: 'Draft final report intro section', dueDate: '2026-05-10', tag: 'Writing', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 4, name: 'Conduct user interviews (5 participants)', dueDate: '2026-04-28', tag: 'Research', priority: 'low', done: true, assignee: 'D', color: '#3d6bff' }
+    { id: 1, groupId: 'groupsync', name: 'Finalize usability test report', dueDate: '2026-05-03', tag: 'Research', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
+    { id: 2, groupId: 'groupsync', name: 'Annotate wireframes with HCI principles', dueDate: '2026-05-07', tag: 'Design', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
+    { id: 3, groupId: 'market', name: 'Draft positioning section', dueDate: '2026-05-10', tag: 'Writing', priority: 'med', done: false, assignee: 'K', color: '#8b5cf6' },
+    { id: 4, groupId: 'gamedesign', name: 'Conduct playtest with 5 students', dueDate: '2026-05-08', tag: 'Research', priority: 'low', done: true, assignee: 'R', color: '#10b981' }
   ];
   const DEFAULT_CONVERSATIONS = {
     groupsync: {
@@ -2136,7 +2137,9 @@
   let tasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.tasks) || 'null') || DEFAULT_TASKS;
   let conversations = JSON.parse(localStorage.getItem(STORAGE_KEYS.messages) || 'null') || DEFAULT_CONVERSATIONS;
   let activeConversation = 'groupsync';
+  let activeGroup = 'groupsync';
   let score = Number(localStorage.getItem(STORAGE_KEYS.score) || 8);
+  const GROUP_LABELS = { groupsync: 'GroupSync Team', market: 'Market Analysis', gamedesign: 'Game Design Crew' };
 
   function smoothScroll(id) { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
   function openApp() { document.getElementById('landing').style.display = 'none'; document.getElementById('app').style.display = 'block'; }
@@ -2187,7 +2190,7 @@
       return `<div class="timeline-item">
         <div class="timeline-date"><div class="tl-day">${String(dueDate.getDate()).padStart(2, '0')}</div><div class="tl-month">${dueDate.toLocaleDateString('en-US', { month: 'short' })}</div></div>
         <div class="timeline-dot" style="background:${chip.dotColor}"></div>
-        <div class="tl-content"><div class="tl-title">${task.name}</div><div class="tl-group">${task.tag} Task</div></div>
+        <div class="tl-content"><div class="tl-title">${task.name}</div><div class="tl-group">${GROUP_LABELS[task.groupId] || 'Group'} · ${task.tag}</div></div>
         <span class="chip ${chip.chipClass}">${chip.text}</span>
       </div>`;
     }).join('');
@@ -2203,9 +2206,9 @@
       <div class="task-checkbox ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">${task.done ? '✓' : ''}</div>
       <div class="task-content">
         <div class="task-name ${task.done ? 'done' : ''}">${task.name}</div>
-        <div class="task-meta"><span class="task-due ${getTaskDueState(task).className}">${getTaskDueState(task).label}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span></div>
+        <div class="task-meta"><span class="task-due ${getTaskDueState(task).className}">${getTaskDueState(task).label}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span><span style="font-size:11px;color:var(--muted)">${GROUP_LABELS[task.groupId]}</span></div>
       </div>
-      <div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;"><div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="deleteTask(${task.id})">Delete</button></div>
     </div>`).join('');
     document.getElementById('dashboard-task-list').innerHTML = markup;
     document.getElementById('tasks-page-list').innerHTML = markup;
@@ -2220,6 +2223,10 @@
     else { score = Math.max(0, score - SCORE_WEIGHTS.complete); showToast('↩️ Task reopened'); }
     saveState(); renderTasks();
   }
+  function deleteTask(taskId) {
+    tasks = tasks.filter(t => t.id !== taskId);
+    saveState(); renderTasks(); showToast('🗑️ Task deleted');
+  }
 
   function updateContributionUI() {
     const completed = tasks.filter(t => t.done).length;
@@ -2232,12 +2239,17 @@
 
   function toggleNotif() { document.getElementById('notif-panel').classList.toggle('show'); }
   document.addEventListener('click', function(e) { const panel = document.getElementById('notif-panel'); if (!e.target.closest('#notif-panel') && !e.target.closest('.icon-btn')) panel.classList.remove('show'); });
-  function showModal() { document.getElementById('task-modal').classList.add('show'); }
+  function showModal() {
+    document.getElementById('task-modal').classList.add('show');
+    const groupSelect = document.getElementById('task-group');
+    if (groupSelect) groupSelect.value = activeGroup;
+  }
   function closeModal() { document.getElementById('task-modal').classList.remove('show'); }
   function closeModalOnBg(e) { if (e.target === document.getElementById('task-modal')) closeModal(); }
   function createTask() {
     const name = document.querySelector('#task-modal .form-input')?.value.trim() || `New task ${tasks.length + 1}`;
-    tasks.unshift({ id: Date.now(), name, dueDate: new Date(TODAY.getTime() + DAY_MS).toISOString().split('T')[0], tag: 'Research', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' });
+    const selectedGroupId = document.getElementById('task-group')?.value || activeGroup;
+    tasks.unshift({ id: Date.now(), groupId: selectedGroupId, name, dueDate: new Date(TODAY.getTime() + DAY_MS).toISOString().split('T')[0], tag: 'Research', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' });
     score += SCORE_WEIGHTS.create;
     saveState(); renderTasks(); closeModal(); showToast('✅ Task created successfully!');
   }
@@ -2254,9 +2266,35 @@
   }
   function switchConversation(conversationId, el) {
     activeConversation = conversationId;
+    activeGroup = conversationId;
     document.querySelectorAll('.chat-conv-item').forEach(item => item.classList.remove('active'));
     if (el) el.classList.add('active');
     renderMessages();
+    renderTasks();
+  }
+
+
+  function activateConversation(e, conversationId, element){
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      switchConversation(conversationId, element);
+    }
+  }
+
+  function activateGroupCard(e, conversationId){
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openGroupConversation(conversationId);
+    }
+  }
+
+  function openGroupConversation(conversationId){
+    showPage('chat', document.querySelector('.nav-item[onclick*="showPage(\'chat\'"]'));
+    const conversation = document.querySelector(`.chat-conv-item[data-conv-id="${conversationId}"]`);
+    if (conversation) {
+      switchConversation(conversationId, conversation);
+      conversation.focus();
+    }
   }
 
 
@@ -2294,6 +2332,15 @@
     conversations[activeConversation].messages = Array.from(msgs.children).map(n => n.outerHTML);
     score += SCORE_WEIGHTS.message; saveState(); updateContributionUI();
     input.value = ''; msgs.scrollTop = msgs.scrollHeight;
+  }
+  function inviteToGroup() {
+    const name = prompt(`Invite to ${conversations[activeConversation].name}: enter a name`);
+    if (!name) return;
+    const convo = conversations[activeConversation];
+    const currentMembers = Number((convo.meta.match(/^(\\d+)/) || [4])[1]);
+    convo.meta = `${currentMembers + 1} members · ${convo.meta.split('·')[1].trim()}`;
+    convo.messages.push(`<div class="msg-row"><div class="avatar-sm" style="background:#6b7280">S</div><div class="msg-body"><div class="msg-sender">System</div><div class="msg-bubble">${name} was invited to ${convo.name}.</div><div class="msg-time">Just now</div></div></div>`);
+    saveState(); renderMessages(); showToast(`✉️ Invited ${name}`);
   }
 
   function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
