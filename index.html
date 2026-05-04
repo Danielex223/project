@@ -2297,6 +2297,30 @@
     }
   }
 
+
+  function activateConversation(e, conversationId, element){
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      switchConversation(conversationId, element);
+    }
+  }
+
+  function activateGroupCard(e, conversationId){
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openGroupConversation(conversationId);
+    }
+  }
+
+  function openGroupConversation(conversationId){
+    showPage('chat', document.querySelector('.nav-item[onclick*="showPage(\'chat\'"]'));
+    const conversation = document.querySelector(`.chat-conv-item[data-conv-id="${conversationId}"]`);
+    if (conversation) {
+      switchConversation(conversationId, conversation);
+      conversation.focus();
+    }
+  }
+
   function sendMsg(e) {
     if (e.key !== 'Enter') return;
     const input = document.getElementById('chat-input');
