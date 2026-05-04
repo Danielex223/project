@@ -1936,21 +1936,21 @@
         <div class="chat-layout">
           <div class="chat-sidebar">
             <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">Conversations</div>
-            <div class="chat-conv-item active">
+            <div class="chat-conv-item active" data-conv-id="groupsync" onclick="switchConversation('groupsync', this)">
               <div class="conv-icon">🖥️</div>
               <div>
                 <div class="conv-name">GroupSync Team</div>
                 <div class="conv-preview">On it! Will push tonight 🙌</div>
               </div>
             </div>
-            <div class="chat-conv-item">
+            <div class="chat-conv-item" data-conv-id="market" onclick="switchConversation('market', this)">
               <div class="conv-icon">📈</div>
               <div>
                 <div class="conv-name">Market Analysis</div>
                 <div class="conv-preview">Who's doing the slides?</div>
               </div>
             </div>
-            <div class="chat-conv-item">
+            <div class="chat-conv-item" data-conv-id="gamedesign" onclick="switchConversation('gamedesign', this)">
               <div class="conv-icon">🎮</div>
               <div>
                 <div class="conv-name">Game Design Crew</div>
@@ -1960,10 +1960,10 @@
           </div>
           <div class="chat-main">
             <div style="padding:12px 20px;border-bottom:1px solid var(--border);background:#fff;display:flex;align-items:center;gap:10px;">
-              <div style="font-size:20px;">🖥️</div>
+              <div style="font-size:20px;" id="chat-header-icon">🖥️</div>
               <div>
-                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">GroupSync Team</div>
-                <div style="font-size:11px;color:var(--muted);">4 members · GAME 324.101</div>
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;" id="chat-header-name">GroupSync Team</div>
+                <div style="font-size:11px;color:var(--muted);" id="chat-header-meta">4 members · GAME 324.101</div>
               </div>
             </div>
             <div class="chat-messages" id="chat-messages">
@@ -2192,13 +2192,32 @@
 <script>
   const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score' };
   const SCORE_WEIGHTS = { create: 2, complete: 3, message: 1 };
+  const TODAY = new Date('2026-05-04T00:00:00');
+  const DAY_MS = 24 * 60 * 60 * 1000;
   const DEFAULT_TASKS = [
-    { id: 1, name: 'Finalize usability test report', due: 'Due May 5', tag: 'Research', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 2, name: 'Annotate wireframes with HCI principles', due: 'Due May 7', tag: 'Design', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 3, name: 'Draft final report intro section', due: 'Due May 10', tag: 'Writing', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' },
-    { id: 4, name: 'Conduct user interviews (5 participants)', due: 'Completed Apr 28', tag: 'Research', priority: 'low', done: true, assignee: 'D', color: '#3d6bff' }
+    { id: 1, name: 'Finalize usability test report', dueDate: '2026-05-03', tag: 'Research', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
+    { id: 2, name: 'Annotate wireframes with HCI principles', dueDate: '2026-05-07', tag: 'Design', priority: 'high', done: false, assignee: 'D', color: '#3d6bff' },
+    { id: 3, name: 'Draft final report intro section', dueDate: '2026-05-10', tag: 'Writing', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' },
+    { id: 4, name: 'Conduct user interviews (5 participants)', dueDate: '2026-04-28', tag: 'Research', priority: 'low', done: true, assignee: 'D', color: '#3d6bff' }
   ];
+  const DEFAULT_CONVERSATIONS = {
+    groupsync: {
+      name: 'GroupSync Team',
+      icon: '🖥️',
+      meta: '4 members · GAME 324.101',
+      inputPlaceholder: 'Message GroupSync Team…',
+      messages: [
+        '<div class="msg-row"><div class="avatar-sm" style="background:#f59e0b">M</div><div class="msg-body"><div class="msg-sender">Maya</div><div class="msg-bubble">Hey team — can someone take the usability test report? I have an exam tomorrow 😭</div><div class="msg-time">2:14 PM</div></div></div>',
+        '<div class="msg-row"><div class="avatar-sm" style="background:#1db877">J</div><div class="msg-body"><div class="msg-sender">James</div><div class="msg-bubble">I can draft the findings section if someone handles the intro</div><div class="msg-time">2:17 PM</div></div></div>',
+        '<div class="msg-row mine"><div class="avatar-sm" style="background:#3d6bff">D</div><div class="msg-body"><div class="msg-sender">You</div><div class="msg-bubble">On it! I\'ll handle the intro + submit. Will push tonight 🙌</div><div class="msg-time">2:19 PM</div></div></div>'
+      ]
+    },
+    market: { name: 'Market Analysis', icon: '📈', meta: '3 members · BUSI 210', inputPlaceholder: 'Message Market Analysis…', messages: ['<div class="msg-row"><div class="avatar-sm" style="background:#8b5cf6">K</div><div class="msg-body"><div class="msg-sender">Kira</div><div class="msg-bubble">Who can take the positioning slides?</div><div class="msg-time">11:08 AM</div></div></div>'] },
+    gamedesign: { name: 'Game Design Crew', icon: '🎮', meta: '4 members · GAME 301', inputPlaceholder: 'Message Game Design Crew…', messages: ['<div class="msg-row"><div class="avatar-sm" style="background:#10b981">R</div><div class="msg-body"><div class="msg-sender">Ruben</div><div class="msg-bubble">Level 2 mechanics are almost done. Need QA tonight.</div><div class="msg-time">9:41 AM</div></div></div>'] }
+  };
   let tasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.tasks) || 'null') || DEFAULT_TASKS;
+  let conversations = JSON.parse(localStorage.getItem(STORAGE_KEYS.messages) || 'null') || DEFAULT_CONVERSATIONS;
+  let activeConversation = 'groupsync';
   let score = Number(localStorage.getItem(STORAGE_KEYS.score) || 8);
 
   function smoothScroll(id) { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
@@ -2216,7 +2235,19 @@
   }
 
   function taskTagClass(tag) { return `tag-${tag.toLowerCase() === 'writing' ? 'writing' : tag.toLowerCase() === 'design' ? 'design' : tag.toLowerCase() === 'dev' ? 'dev' : 'research'}`; }
-  function saveState() { localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks)); localStorage.setItem(STORAGE_KEYS.score, String(score)); }
+  function saveState() {
+    localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks));
+    localStorage.setItem(STORAGE_KEYS.messages, JSON.stringify(conversations));
+    localStorage.setItem(STORAGE_KEYS.score, String(score));
+  }
+  function getTaskDueState(task) {
+    if (task.done) return { label: `Completed ${new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, className: '' };
+    const diffDays = Math.ceil((new Date(task.dueDate) - TODAY) / DAY_MS);
+    if (diffDays < 0) return { label: `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'}`, className: 'overdue' };
+    if (diffDays <= 2) return { label: `Due Soon · ${diffDays === 0 ? 'Today' : `${diffDays} day${diffDays === 1 ? '' : 's'}`}`, className: 'overdue' };
+    const dueLabel = new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return { label: `Due ${dueLabel}`, className: '' };
+  }
 
   function renderTasks() {
     const markup = tasks.map(task => `<div class="task-item">
@@ -2224,7 +2255,7 @@
       <div class="task-checkbox ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">${task.done ? '✓' : ''}</div>
       <div class="task-content">
         <div class="task-name ${task.done ? 'done' : ''}">${task.name}</div>
-        <div class="task-meta"><span class="task-due ${task.due.includes('Due May 5') ? 'overdue' : ''}">${task.due}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span></div>
+        <div class="task-meta"><span class="task-due ${getTaskDueState(task).className}">${getTaskDueState(task).label}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span></div>
       </div>
       <div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div>
     </div>`).join('');
@@ -2257,15 +2288,26 @@
   function closeModalOnBg(e) { if (e.target === document.getElementById('task-modal')) closeModal(); }
   function createTask() {
     const name = document.querySelector('#task-modal .form-input')?.value.trim() || `New task ${tasks.length + 1}`;
-    tasks.unshift({ id: Date.now(), name, due: 'Due Soon', tag: 'Research', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' });
+    tasks.unshift({ id: Date.now(), name, dueDate: new Date(TODAY.getTime() + DAY_MS).toISOString().split('T')[0], tag: 'Research', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' });
     score += SCORE_WEIGHTS.create;
     saveState(); renderTasks(); closeModal(); showToast('✅ Task created successfully!');
   }
 
   function renderMessages() {
-    const msgs = JSON.parse(localStorage.getItem(STORAGE_KEYS.messages) || 'null');
-    if (!msgs) return;
-    document.getElementById('chat-messages').innerHTML = msgs.join('');
+    const convo = conversations[activeConversation];
+    document.getElementById('chat-header-icon').textContent = convo.icon;
+    document.getElementById('chat-header-name').textContent = convo.name;
+    document.getElementById('chat-header-meta').textContent = convo.meta;
+    document.getElementById('chat-input').placeholder = convo.inputPlaceholder;
+    document.getElementById('chat-messages').innerHTML = convo.messages.join('');
+    const msgs = document.getElementById('chat-messages');
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  function switchConversation(conversationId, el) {
+    activeConversation = conversationId;
+    document.querySelectorAll('.chat-conv-item').forEach(item => item.classList.remove('active'));
+    if (el) el.classList.add('active');
+    renderMessages();
   }
 
   function sendMsg(e) {
@@ -2274,14 +2316,15 @@
     const text = input.value.trim();
     if (!text) return;
     const html = `<div class="msg-row mine"><div class="avatar-sm" style="background:#3d6bff">D</div><div class="msg-body"><div class="msg-sender">You</div><div class="msg-bubble">${text}</div><div class="msg-time">Just now</div></div></div>`;
-    const msgs = document.getElementById('chat-messages'); msgs.insertAdjacentHTML('beforeend', html);
-    localStorage.setItem(STORAGE_KEYS.messages, JSON.stringify(Array.from(msgs.children).map(n => n.outerHTML)));
+    const msgs = document.getElementById('chat-messages');
+    msgs.insertAdjacentHTML('beforeend', html);
+    conversations[activeConversation].messages = Array.from(msgs.children).map(n => n.outerHTML);
     score += SCORE_WEIGHTS.message; saveState(); updateContributionUI();
     input.value = ''; msgs.scrollTop = msgs.scrollHeight;
   }
 
   function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
-  renderTasks(); renderMessages();
+  renderTasks(); renderMessages(); saveState();
 </script>
 </body>
 </html>
