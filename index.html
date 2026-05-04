@@ -1649,35 +1649,7 @@
                 <div class="card-title">Upcoming Deadlines</div>
                 <div class="card-action" onclick="showPage('deadlines', null)">View all →</div>
               </div>
-              <div class="timeline">
-                <div class="timeline-item">
-                  <div class="timeline-date"><div class="tl-day">05</div><div class="tl-month">May</div></div>
-                  <div class="timeline-dot" style="background:var(--red)"></div>
-                  <div class="tl-content">
-                    <div class="tl-title">Usability Test Report</div>
-                    <div class="tl-group">HCI Final — GroupSync</div>
-                  </div>
-                  <span class="chip chip-red">Tomorrow</span>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-date"><div class="tl-day">10</div><div class="tl-month">May</div></div>
-                  <div class="timeline-dot" style="background:var(--amber)"></div>
-                  <div class="tl-content">
-                    <div class="tl-title">Final Report Draft</div>
-                    <div class="tl-group">HCI Final — GroupSync</div>
-                  </div>
-                  <span class="chip chip-amber">6 days</span>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-date"><div class="tl-day">14</div><div class="tl-month">May</div></div>
-                  <div class="timeline-dot" style="background:var(--green)"></div>
-                  <div class="tl-content">
-                    <div class="tl-title">Final Presentation</div>
-                    <div class="tl-group">GAME 324.101</div>
-                  </div>
-                  <span class="chip chip-green">10 days</span>
-                </div>
-              </div>
+              <div class="timeline" id="dashboard-deadlines"></div>
             </div>
 
             <div class="card">
@@ -1867,62 +1839,7 @@
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">May 2026</div></div>
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">05</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--red)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Usability Test Report Submission</div>
-                <div class="tl-group">GroupSync — GAME 324.101</div>
-              </div>
-              <span class="chip chip-red">Tomorrow</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">07</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--amber)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Annotated Wireframe Submission</div>
-                <div class="tl-group">GroupSync — GAME 324.101</div>
-              </div>
-              <span class="chip chip-amber">3 days</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">10</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--amber)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Final Report Draft Due</div>
-                <div class="tl-group">GroupSync — GAME 324.101</div>
-              </div>
-              <span class="chip chip-amber">6 days</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">12</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--green)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Market Analysis Peer Review</div>
-                <div class="tl-group">BUSI 210</div>
-              </div>
-              <span class="chip chip-green">8 days</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">14</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--green)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Final Presentation Day</div>
-                <div class="tl-group">GAME 324.101 · Last day of semester</div>
-              </div>
-              <span class="chip chip-green">10 days</span>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date"><div class="tl-day">14</div><div class="tl-month">May</div></div>
-              <div class="timeline-dot" style="background:var(--green)"></div>
-              <div class="tl-content">
-                <div class="tl-title">Game Prototype Final Build</div>
-                <div class="tl-group">GAME 301</div>
-              </div>
-              <span class="chip chip-green">10 days</span>
-            </div>
-          </div>
+          <div class="timeline" id="deadlines-page-list"></div>
         </div>
       </div>
 
@@ -2250,6 +2167,36 @@
     return { label: `Due ${dueLabel}`, className: '' };
   }
 
+  function getDeadlineChip(diffDays) {
+    if (diffDays < 0) return { text: `Overdue ${Math.abs(diffDays)}d`, chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays === 0) return { text: 'Today', chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays === 1) return { text: 'Tomorrow', chipClass: 'chip-red', dotColor: 'var(--red)' };
+    if (diffDays <= 7) return { text: `${diffDays} days`, chipClass: 'chip-amber', dotColor: 'var(--amber)' };
+    return { text: `${diffDays} days`, chipClass: 'chip-green', dotColor: 'var(--green)' };
+  }
+
+  function renderDeadlines() {
+    const upcomingTasks = tasks
+      .filter(task => !task.done)
+      .map(task => ({ ...task, diffDays: Math.ceil((new Date(task.dueDate) - TODAY) / DAY_MS) }))
+      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+    const deadlineMarkup = upcomingTasks.map(task => {
+      const dueDate = new Date(task.dueDate);
+      const chip = getDeadlineChip(task.diffDays);
+      return `<div class="timeline-item">
+        <div class="timeline-date"><div class="tl-day">${String(dueDate.getDate()).padStart(2, '0')}</div><div class="tl-month">${dueDate.toLocaleDateString('en-US', { month: 'short' })}</div></div>
+        <div class="timeline-dot" style="background:${chip.dotColor}"></div>
+        <div class="tl-content"><div class="tl-title">${task.name}</div><div class="tl-group">${task.tag} Task</div></div>
+        <span class="chip ${chip.chipClass}">${chip.text}</span>
+      </div>`;
+    }).join('');
+
+    const emptyState = '<div style="padding:8px 0;color:var(--muted);font-size:12px;">No upcoming deadlines.</div>';
+    document.getElementById('dashboard-deadlines').innerHTML = deadlineMarkup || emptyState;
+    document.getElementById('deadlines-page-list').innerHTML = deadlineMarkup || emptyState;
+  }
+
   function renderTasks() {
     const markup = tasks.map(task => `<div class="task-item">
       <div class="priority priority-${task.priority}"></div>
@@ -2263,6 +2210,7 @@
     document.getElementById('dashboard-task-list').innerHTML = markup;
     document.getElementById('tasks-page-list').innerHTML = markup;
     updateContributionUI();
+    renderDeadlines();
   }
 
   function toggleTask(taskId) {
