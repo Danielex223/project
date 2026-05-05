@@ -1304,6 +1304,20 @@
     </div>
   </div>
 
+
+  <section id="how-it-works" style="padding:80px 48px;max-width:1100px;margin:0 auto;">
+    <div class="section-header">
+      <div class="section-label">How it works</div>
+      <div class="section-title">From chaotic group chat to clear progress in minutes.</div>
+      <div class="section-sub">Create tasks with real due dates, priorities, and tags, collaborate in chat, and track fair contribution scores across every project group.</div>
+    </div>
+    <div class="three-col">
+      <div class="card" style="padding:20px;"><div class="card-title" style="margin-bottom:8px;">1) Plan the work</div><p style="font-size:13px;color:var(--muted);line-height:1.6;">Capture tasks with assignee, due date, priority, and course-specific tags so no detail is lost.</p></div>
+      <div class="card" style="padding:20px;"><div class="card-title" style="margin-bottom:8px;">2) Collaborate live</div><p style="font-size:13px;color:var(--muted);line-height:1.6;">Discuss in context with each team and keep updates tied to the right project space.</p></div>
+      <div class="card" style="padding:20px;"><div class="card-title" style="margin-bottom:8px;">3) Prove contribution</div><p style="font-size:13px;color:var(--muted);line-height:1.6;">Monitor completion and contribution score so everyone sees who is helping move the project forward.</p></div>
+    </div>
+  </section>
+
   <!-- Differentiators -->
   <section id="differentiators">
     <div class="section-header">
@@ -1504,7 +1518,7 @@
         </div>
         <div class="nav-item" onclick="showPage('tasks', this)">
           <span class="nav-icon">✅</span> Tasks
-          <span class="nav-badge">3</span>
+          <span class="nav-badge" id="tasks-nav-badge">0</span>
         </div>
         <div class="nav-item" onclick="showPage('deadlines', this)">
           <span class="nav-icon">📅</span> Deadlines
@@ -1512,7 +1526,7 @@
         <div class="nav-section-label">Collaboration</div>
         <div class="nav-item" onclick="showPage('chat', this)">
           <span class="nav-icon">💬</span> Group Chat
-          <span class="nav-badge">2</span>
+          <span class="nav-badge" id="chat-nav-badge">0</span>
         </div>
         <div class="nav-item" onclick="showPage('contributions', this)">
           <span class="nav-icon">⚖️</span> Contributions
@@ -1529,7 +1543,7 @@
     <div class="main-content">
       <div class="topbar">
         <div class="topbar-title" id="topbar-title">Dashboard</div>
-        <div class="topbar-actions">
+        <div class="topbar-actions"><span class="chip chip-green" id="score-pill">🏆 Score: 0</span><button class="btn btn-ghost" style="padding:6px 10px;font-size:12px;" onclick="undoDeleteTask()">Undo Delete</button>
           <button class="btn btn-primary" onclick="showModal()" style="padding:8px 16px;font-size:13px;">+ New Task</button>
           <div class="icon-btn" onclick="toggleNotif()">🔔<div class="notif-dot"></div><span id="notif-count" style="position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border-radius:10px;min-width:18px;height:18px;padding:0 5px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;">0</span></div>
         </div>
@@ -1763,69 +1777,6 @@
             </div>
           </div>
           <div class="task-list" id="tasks-page-list">
-            <div class="task-item">
-              <div class="priority priority-high"></div>
-              <div class="task-checkbox" onclick="toggleTask(this)"></div>
-              <div class="task-content">
-                <div class="task-name">Finalize usability test report</div>
-                <div class="task-meta"><span class="task-due overdue">Due May 5</span><span class="tag tag-research">Research</span><span style="font-size:11px;color:var(--muted)">GroupSync</span></div>
-              </div>
-              <div class="task-assignee"><div class="avatar-sm" style="background:#3d6bff">D</div></div>
-            </div>
-            <div class="task-item">
-              <div class="priority priority-high"></div>
-              <div class="task-checkbox" onclick="toggleTask(this)"></div>
-              <div class="task-content">
-                <div class="task-name">Annotate wireframes with HCI principles</div>
-                <div class="task-meta"><span class="task-due">Due May 7</span><span class="tag tag-design">Design</span><span style="font-size:11px;color:var(--muted)">GroupSync</span></div>
-              </div>
-              <div class="task-assignee"><div class="avatar-sm" style="background:#3d6bff">D</div></div>
-            </div>
-            <div class="task-item">
-              <div class="priority priority-med"></div>
-              <div class="task-checkbox" onclick="toggleTask(this)"></div>
-              <div class="task-content">
-                <div class="task-name">Draft final report intro section</div>
-                <div class="task-meta"><span class="task-due">Due May 10</span><span class="tag tag-writing">Writing</span><span style="font-size:11px;color:var(--muted)">GroupSync</span></div>
-              </div>
-              <div class="task-assignee"><div class="avatar-sm" style="background:#3d6bff">D</div></div>
-            </div>
-            <div class="task-item">
-              <div class="priority priority-med"></div>
-              <div class="task-checkbox" onclick="toggleTask(this)"></div>
-              <div class="task-content">
-                <div class="task-name">Competitive analysis slide deck</div>
-                <div class="task-meta"><span class="task-due">Due May 12</span><span class="tag tag-research">Research</span><span style="font-size:11px;color:var(--muted)">Market Analysis</span></div>
-              </div>
-              <div class="task-assignee"><div class="avatar-sm" style="background:#8b5cf6">K</div></div>
-            </div>
-            <div class="task-item">
-              <div class="priority priority-med"></div>
-              <div class="task-checkbox" onclick="toggleTask(this)"></div>
-              <div class="task-content">
-                <div class="task-name">Prototype level 2 mechanics</div>
-                <div class="task-meta"><span class="task-due">Due May 14</span><span class="tag tag-dev">Dev</span><span style="font-size:11px;color:var(--muted)">Game Design</span></div>
-              </div>
-              <div class="task-assignee"><div class="avatar-sm" style="background:#10b981">R</div></div>
-            </div>
-            <div class="task-item">
-              <div class="priority priority-low"></div>
-              <div class="task-checkbox done" onclick="toggleTask(this)">✓</div>
-              <div class="task-content">
-                <div class="task-name done">Conduct user interviews (5 participants)</div>
-                <div class="task-meta"><span class="task-due">Completed Apr 28</span><span class="tag tag-research">Research</span></div>
-              </div>
-              <div class="task-assignee"><div class="avatar-sm" style="background:#3d6bff">D</div></div>
-            </div>
-            <div class="task-item">
-              <div class="priority priority-low"></div>
-              <div class="task-checkbox done" onclick="toggleTask(this)">✓</div>
-              <div class="task-content">
-                <div class="task-name done">Create low-fidelity wireframes</div>
-                <div class="task-meta"><span class="task-due">Completed Apr 22</span><span class="tag tag-design">Design</span></div>
-              </div>
-              <div class="task-assignee"><div class="avatar-sm" style="background:#f59e0b">M</div></div>
-            </div>
           </div>
         </div>
       </div>
@@ -1886,46 +1837,6 @@
               </div>
             </div>
             <div class="chat-messages" id="chat-messages">
-              <div class="msg-row">
-                <div class="avatar-sm" style="background:#f59e0b">M</div>
-                <div class="msg-body">
-                  <div class="msg-sender">Maya</div>
-                  <div class="msg-bubble">Hey team — can someone take the usability test report? I have an exam tomorrow 😭</div>
-                  <div class="msg-time">2:14 PM</div>
-                </div>
-              </div>
-              <div class="msg-row">
-                <div class="avatar-sm" style="background:#1db877">J</div>
-                <div class="msg-body">
-                  <div class="msg-sender">James</div>
-                  <div class="msg-bubble">I can draft the findings section if someone handles the intro</div>
-                  <div class="msg-time">2:17 PM</div>
-                </div>
-              </div>
-              <div class="msg-row mine">
-                <div class="avatar-sm" style="background:#3d6bff">D</div>
-                <div class="msg-body">
-                  <div class="msg-sender">You</div>
-                  <div class="msg-bubble">On it! I'll handle the intro + submit. Will push tonight 🙌</div>
-                  <div class="msg-time">2:19 PM</div>
-                </div>
-              </div>
-              <div class="msg-row">
-                <div class="avatar-sm" style="background:#ef4444">A</div>
-                <div class="msg-body">
-                  <div class="msg-sender">Aisha</div>
-                  <div class="msg-bubble">I already uploaded the outline doc to the group folder. Check the files section!</div>
-                  <div class="msg-time">2:22 PM</div>
-                </div>
-              </div>
-              <div class="msg-row">
-                <div class="avatar-sm" style="background:#f59e0b">M</div>
-                <div class="msg-body">
-                  <div class="msg-sender">Maya</div>
-                  <div class="msg-bubble">You all are lifesavers 🙏 Good luck Daniel!</div>
-                  <div class="msg-time">2:24 PM</div>
-                </div>
-              </div>
             </div>
             <div class="chat-input-bar">
               <input class="chat-input" id="chat-input" placeholder="Message GroupSync Team…" onkeydown="sendMsg(event)">
@@ -1962,7 +1873,7 @@
 <div class="notif-panel" id="notif-panel">
   <div class="notif-header">
     Notifications
-    <span style="font-size:11px;color:var(--accent);cursor:pointer;font-weight:500;">Mark all read</span>
+    <button class="btn btn-ghost" style="padding:2px 6px;font-size:11px;" onclick="markAllRead()">Mark all read</button>
   </div>
   <div id="notif-list"></div>
 </div>
@@ -1973,7 +1884,7 @@
     <div class="modal-title">Create New Task</div>
     <div class="form-group">
       <label class="form-label">Task Name</label>
-      <input class="form-input" placeholder="e.g. Write methodology section…">
+      <input class="form-input" id="task-name" placeholder="e.g. Write methodology section…">
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -1987,10 +1898,10 @@
       </div>
       <div class="form-group">
         <label class="form-label">Priority</label>
-        <select class="form-select">
-          <option>High</option>
-          <option>Medium</option>
-          <option>Low</option>
+        <select class="form-select" id="task-priority">
+          <option value="high">High</option>
+          <option value="med">Medium</option>
+          <option value="low">Low</option>
         </select>
       </div>
     </div>
@@ -2005,8 +1916,14 @@
       </div>
       <div class="form-group">
         <label class="form-label">Due Date</label>
-        <input class="form-input" type="date" value="2026-05-10">
+        <input class="form-input" id="task-due-date" type="date" value="2026-05-10">
       </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tag</label>
+      <select class="form-select" id="task-tag">
+        <option>Research</option><option>Design</option><option>Dev</option><option>Writing</option>
+      </select>
     </div>
     <div class="form-group">
       <label class="form-label">Notes (optional)</label>
@@ -2019,11 +1936,27 @@
   </div>
 </div>
 
+
+
+<div class="new-task-modal" id="invite-modal" onclick="closeInviteModalOnBg(event)">
+  <div class="modal-box">
+    <div class="modal-title">Invite Teammate</div>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input class="form-input" id="invite-name" placeholder="e.g. Priya">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeInviteModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitInvite()">Send Invite</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-  const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score' };
+  const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score', notifRead: 'groupsync.notifRead', chatRead: 'groupsync.chatRead' };
   const SCORE_WEIGHTS = { create: 2, complete: 3, message: 1 };
   const TODAY = new Date('2026-05-04T00:00:00');
   const DAY_MS = 24 * 60 * 60 * 1000;
@@ -2048,12 +1981,26 @@
     market: { name: 'Market Analysis', icon: '📈', meta: '3 members · BUSI 210', inputPlaceholder: 'Message Market Analysis…', messages: ['<div class="msg-row"><div class="avatar-sm" style="background:#8b5cf6">K</div><div class="msg-body"><div class="msg-sender">Kira</div><div class="msg-bubble">Who can take the positioning slides?</div><div class="msg-time">11:08 AM</div></div></div>'] },
     gamedesign: { name: 'Game Design Crew', icon: '🎮', meta: '4 members · GAME 301', inputPlaceholder: 'Message Game Design Crew…', messages: ['<div class="msg-row"><div class="avatar-sm" style="background:#10b981">R</div><div class="msg-body"><div class="msg-sender">Ruben</div><div class="msg-bubble">Level 2 mechanics are almost done. Need QA tonight.</div><div class="msg-time">9:41 AM</div></div></div>'] }
   };
-  let tasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.tasks) || 'null') || DEFAULT_TASKS;
-  let conversations = JSON.parse(localStorage.getItem(STORAGE_KEYS.messages) || 'null') || DEFAULT_CONVERSATIONS;
+  let tasks = readJSON(STORAGE_KEYS.tasks, null) || DEFAULT_TASKS;
+  let conversations = readJSON(STORAGE_KEYS.messages, null) || DEFAULT_CONVERSATIONS;
   let activeConversation = 'groupsync';
   let activeGroup = 'groupsync';
   let score = Number(localStorage.getItem(STORAGE_KEYS.score) || 8);
+  let recentlyDeletedTask = null;
+  let editingTaskId = null;
+  let readTaskNotificationIds = readJSON(STORAGE_KEYS.notifRead, []);
+  let chatReadState = readJSON(STORAGE_KEYS.chatRead, {});
   const GROUP_LABELS = { groupsync: 'GroupSync Team', market: 'Market Analysis', gamedesign: 'Game Design Crew' };
+
+  function readJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
 
   function smoothScroll(id) { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
   function openApp() { document.getElementById('landing').style.display = 'none'; document.getElementById('app').style.display = 'block'; }
@@ -2063,6 +2010,13 @@
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('page-' + name).classList.add('active');
+    if (name === 'tasks' || name === 'chat') {
+      readTaskNotificationIds = tasks.filter(t => !t.done).map(t => t.id);
+      if (name === 'chat') {
+        chatReadState[activeConversation] = conversations[activeConversation]?.messages?.length || 0;
+      }
+      saveState();
+    }
     if (el) el.classList.add('active');
     const titles = { dashboard:'Dashboard', groups:'My Groups', tasks:'Tasks', deadlines:'Deadlines', chat:'Group Chat', contributions:'Contributions' };
     document.getElementById('topbar-title').textContent = titles[name] || name;
@@ -2074,6 +2028,8 @@
     localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks));
     localStorage.setItem(STORAGE_KEYS.messages, JSON.stringify(conversations));
     localStorage.setItem(STORAGE_KEYS.score, String(score));
+    localStorage.setItem(STORAGE_KEYS.notifRead, JSON.stringify(readTaskNotificationIds));
+    localStorage.setItem(STORAGE_KEYS.chatRead, JSON.stringify(chatReadState));
   }
   function getTaskDueState(task) {
     if (task.done) return { label: `Completed ${new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, className: '' };
@@ -2114,7 +2070,7 @@
   }
 
   function renderNotifications() {
-    const pendingTasks = tasks.filter(t => !t.done).slice(0, 5);
+    const pendingTasks = tasks.filter(t => !t.done && !readTaskNotificationIds.includes(t.id)).slice(0, 5);
     const items = pendingTasks.map(task => {
       const due = getTaskDueState(task).label;
       return `<div class="notif-item" style="display:flex;gap:10px;">
@@ -2127,6 +2083,35 @@
       </div>`;
     }).join('');
     document.getElementById('notif-list').innerHTML = items || '<div class="notif-item"><div class="notif-item-body">No pending notifications.</div></div>';
+    document.getElementById('notif-count').textContent = String(pendingTasks.length);
+    updateSidebarBadges();
+  }
+
+  function markAllRead() {
+    const unreadIds = tasks.filter(t => !t.done).map(t => t.id);
+    readTaskNotificationIds = Array.from(new Set([...readTaskNotificationIds, ...unreadIds]));
+    saveState();
+    renderNotifications();
+    showToast('✅ Notifications marked as read');
+  }
+
+  function updateSidebarBadges() {
+    const pendingTasksCount = tasks.filter(t => !t.done).length;
+    const taskBadge = document.getElementById('tasks-nav-badge');
+    if (taskBadge) {
+      taskBadge.textContent = String(pendingTasksCount);
+      taskBadge.style.display = pendingTasksCount ? 'inline-flex' : 'none';
+    }
+
+    const totalUnreadChat = Object.entries(conversations).reduce((sum, [id, convo]) => {
+      const readCount = Number(chatReadState[id] || 0);
+      return sum + Math.max(0, convo.messages.length - readCount);
+    }, 0);
+    const chatBadge = document.getElementById('chat-nav-badge');
+    if (chatBadge) {
+      chatBadge.textContent = String(totalUnreadChat);
+      chatBadge.style.display = totalUnreadChat ? 'inline-flex' : 'none';
+    }
   }
 
   function updateDashboardMetrics() {
@@ -2144,6 +2129,12 @@
   }
 
   function renderTasks() {
+    const activeTasks = tasks.filter(t => !t.done).length;
+    if (!activeTasks) {
+      const doneOnly = '<div style="padding:24px;color:var(--muted);font-size:13px;text-align:center;">🎉 All tasks are complete. Add a new task to keep momentum going.</div>';
+      document.getElementById('dashboard-task-list').innerHTML = doneOnly;
+      document.getElementById('tasks-page-list').innerHTML = doneOnly;
+    }
     const markup = tasks.map(task => `<div class="task-item">
       <div class="priority priority-${task.priority}"></div>
       <div class="task-checkbox ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">${task.done ? '✓' : ''}</div>
@@ -2151,10 +2142,10 @@
         <div class="task-name ${task.done ? 'done' : ''}">${task.name}</div>
         <div class="task-meta"><span class="task-due ${getTaskDueState(task).className}">${getTaskDueState(task).label}</span><span class="tag ${taskTagClass(task.tag)}">${task.tag}</span><span style="font-size:11px;color:var(--muted)">${GROUP_LABELS[task.groupId] || 'Unassigned group'}</span></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;"><div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="deleteTask(${task.id})">Delete</button></div>
+      <div style="display:flex;align-items:center;gap:8px;"><div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="openEditTaskModal(${task.id})">Edit</button><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="deleteTask(${task.id})">Delete</button></div>
     </div>`).join('');
-    document.getElementById('dashboard-task-list').innerHTML = markup;
-    document.getElementById('tasks-page-list').innerHTML = markup;
+    if (activeTasks) { document.getElementById('dashboard-task-list').innerHTML = markup;
+    document.getElementById('tasks-page-list').innerHTML = markup; }
     updateContributionUI();
     renderDeadlines();
     updateDashboardMetrics();
@@ -2164,20 +2155,37 @@
   function toggleTask(taskId) {
     const task = tasks.find(t => t.id === taskId);
     task.done = !task.done;
-    if (task.done) { score += SCORE_WEIGHTS.complete; showToast('✅ Task marked complete!'); }
-    else { score = Math.max(0, score - SCORE_WEIGHTS.complete); showToast('↩️ Task reopened'); }
+    if (task.done) {
+      readTaskNotificationIds = readTaskNotificationIds.filter(id => id !== task.id);
+      score += SCORE_WEIGHTS.complete; showToast('✅ Task marked complete!');
+    }
+    else {
+      readTaskNotificationIds = readTaskNotificationIds.filter(id => id !== task.id);
+      score = Math.max(0, score - SCORE_WEIGHTS.complete); showToast('↩️ Task reopened');
+    }
     saveState(); renderTasks();
   }
   function deleteTask(taskId) {
+    recentlyDeletedTask = tasks.find(t => t.id === taskId) || null;
+    readTaskNotificationIds = readTaskNotificationIds.filter(id => id !== taskId);
     tasks = tasks.filter(t => t.id !== taskId);
-    saveState(); renderTasks(); showToast('🗑️ Task deleted');
+    saveState(); renderTasks();
+    showToast('🗑️ Task deleted — Undo available');
+  }
+
+  function undoDeleteTask() {
+    if (!recentlyDeletedTask) return;
+    tasks.unshift(recentlyDeletedTask);
+    readTaskNotificationIds = readTaskNotificationIds.filter(id => id !== recentlyDeletedTask.id);
+    recentlyDeletedTask = null;
+    saveState(); renderTasks(); showToast('↩️ Task restored');
   }
 
   function updateContributionUI() {
     const completed = tasks.filter(t => t.done).length;
     const incompleteTasks = tasks.filter(t => !t.done).length;
     document.getElementById('metric-completed').textContent = String(completed);
-    document.getElementById('notif-count').textContent = String(incompleteTasks);
+    document.getElementById('score-pill').textContent = `🏆 Score: ${score}`;
 
     const counts = tasks.reduce((acc, task) => {
       const key = task.assignee || 'U';
@@ -2213,16 +2221,35 @@
   function toggleNotif() { document.getElementById('notif-panel').classList.toggle('show'); }
   document.addEventListener('click', function(e) { const panel = document.getElementById('notif-panel'); if (!e.target.closest('#notif-panel') && !e.target.closest('.icon-btn')) panel.classList.remove('show'); });
   function showModal() {
+    editingTaskId = null;
+    document.querySelector('#task-modal .modal-title').textContent = 'Create New Task';
+    document.querySelector('#task-modal .btn.btn-primary').textContent = 'Create Task';
+    document.getElementById('task-name').value = '';
+    document.getElementById('task-due-date').value = '2026-05-10';
+    document.getElementById('task-tag').value = 'Research';
+    document.getElementById('task-priority').value = 'med';
     document.getElementById('task-modal').classList.add('show');
     const groupSelect = document.getElementById('task-group');
     if (groupSelect) groupSelect.value = activeGroup;
   }
-  function closeModal() { document.getElementById('task-modal').classList.remove('show'); }
+  function closeModal() { document.getElementById('task-modal').classList.remove('show'); editingTaskId = null; }
   function closeModalOnBg(e) { if (e.target === document.getElementById('task-modal')) closeModal(); }
   function createTask() {
-    const name = document.querySelector('#task-modal .form-input')?.value.trim() || `New task ${tasks.length + 1}`;
+    const name = document.getElementById('task-name')?.value.trim() || `New task ${tasks.length + 1}`;
     const selectedGroupId = document.getElementById('task-group')?.value || activeGroup;
-    tasks.unshift({ id: Date.now(), groupId: selectedGroupId, name, dueDate: new Date(TODAY.getTime() + DAY_MS).toISOString().split('T')[0], tag: 'Research', priority: 'med', done: false, assignee: 'D', color: '#3d6bff' });
+    const dueDate = document.getElementById('task-due-date')?.value || new Date(TODAY.getTime() + DAY_MS).toISOString().split('T')[0];
+    const tag = document.getElementById('task-tag')?.value || 'Research';
+    const priority = document.getElementById('task-priority')?.value || 'med';
+    if (editingTaskId) {
+      const task = tasks.find(t => t.id === editingTaskId);
+      if (task) Object.assign(task, { name, groupId: selectedGroupId, dueDate, tag, priority });
+      editingTaskId = null;
+      saveState(); renderTasks(); closeModal(); showToast('✏️ Task updated');
+      return;
+    }
+    const newTask = { id: Date.now(), groupId: selectedGroupId, name, dueDate, tag, priority, done: false, assignee: 'D', color: '#3d6bff' };
+    tasks.unshift(newTask);
+    readTaskNotificationIds = readTaskNotificationIds.filter(id => id !== newTask.id);
     score += SCORE_WEIGHTS.create;
     saveState(); renderTasks(); closeModal(); showToast('✅ Task created successfully!');
   }
@@ -2243,6 +2270,7 @@
     activeGroup = conversationId;
     document.querySelectorAll('.chat-conv-item').forEach(item => item.classList.remove('active'));
     if (el) el.classList.add('active');
+    chatReadState[activeConversation] = conversations[activeConversation]?.messages?.length || 0;
     renderMessages();
     renderTasks();
   }
@@ -2272,7 +2300,7 @@
   }
 
   function sendMsg(e) {
-    if (e.key !== 'Enter') return;
+    if (e && e.key && e.key !== 'Enter') return;
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if (!text) return;
@@ -2280,20 +2308,42 @@
     const msgs = document.getElementById('chat-messages');
     msgs.insertAdjacentHTML('beforeend', html);
     conversations[activeConversation].messages = Array.from(msgs.children).map(n => n.outerHTML);
-    score += SCORE_WEIGHTS.message; saveState(); updateContributionUI();
+    score += SCORE_WEIGHTS.message;
+    chatReadState[activeConversation] = conversations[activeConversation].messages.length;
+    saveState(); updateContributionUI();
     input.value = ''; msgs.scrollTop = msgs.scrollHeight;
   }
   function inviteToGroup() {
-    const name = prompt(`Invite to ${conversations[activeConversation].name}: enter a name`);
+    document.getElementById('invite-name').value = '';
+    document.getElementById('invite-modal').classList.add('show');
+  }
+  function closeInviteModal() { document.getElementById('invite-modal').classList.remove('show'); }
+  function closeInviteModalOnBg(e) { if (e.target === document.getElementById('invite-modal')) closeInviteModal(); }
+  function submitInvite() {
+    const name = document.getElementById('invite-name').value.trim();
     if (!name) return;
     const convo = conversations[activeConversation];
     const currentMembers = Number((convo.meta.match(/^(\\d+)/) || [4])[1]);
     convo.meta = `${currentMembers + 1} members · ${convo.meta.split('·')[1].trim()}`;
     convo.messages.push(`<div class="msg-row"><div class="avatar-sm" style="background:#6b7280">S</div><div class="msg-body"><div class="msg-sender">System</div><div class="msg-bubble">${name} was invited to ${convo.name}.</div><div class="msg-time">Just now</div></div></div>`);
-    saveState(); renderMessages(); showToast(`✉️ Invited ${name}`);
+    saveState(); renderMessages(); closeInviteModal(); showToast(`✉️ Invited ${name}`);
   }
 
   function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+
+  function openEditTaskModal(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    editingTaskId = taskId;
+    document.getElementById('task-name').value = task.name;
+    document.getElementById('task-group').value = task.groupId;
+    document.getElementById('task-due-date').value = task.dueDate;
+    document.getElementById('task-tag').value = task.tag;
+    document.getElementById('task-priority').value = task.priority;
+    document.querySelector('#task-modal .modal-title').textContent = 'Edit Task';
+    document.querySelector('#task-modal .btn.btn-primary').textContent = 'Save Changes';
+    document.getElementById('task-modal').classList.add('show');
+  }
   renderTasks(); renderMessages(); saveState();
 </script>
 </body>
