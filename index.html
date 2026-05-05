@@ -1957,7 +1957,6 @@
 
 <script>
   const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score', notifRead: 'groupsync.notifRead', chatRead: 'groupsync.chatRead' };
-  const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score', notifRead: 'groupsync.notifRead' };
   const SCORE_WEIGHTS = { create: 2, complete: 3, message: 1 };
   const TODAY = new Date('2026-05-04T00:00:00');
   const DAY_MS = 24 * 60 * 60 * 1000;
@@ -1982,16 +1981,26 @@
     market: { name: 'Market Analysis', icon: '📈', meta: '3 members · BUSI 210', inputPlaceholder: 'Message Market Analysis…', messages: ['<div class="msg-row"><div class="avatar-sm" style="background:#8b5cf6">K</div><div class="msg-body"><div class="msg-sender">Kira</div><div class="msg-bubble">Who can take the positioning slides?</div><div class="msg-time">11:08 AM</div></div></div>'] },
     gamedesign: { name: 'Game Design Crew', icon: '🎮', meta: '4 members · GAME 301', inputPlaceholder: 'Message Game Design Crew…', messages: ['<div class="msg-row"><div class="avatar-sm" style="background:#10b981">R</div><div class="msg-body"><div class="msg-sender">Ruben</div><div class="msg-bubble">Level 2 mechanics are almost done. Need QA tonight.</div><div class="msg-time">9:41 AM</div></div></div>'] }
   };
-  let tasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.tasks) || 'null') || DEFAULT_TASKS;
-  let conversations = JSON.parse(localStorage.getItem(STORAGE_KEYS.messages) || 'null') || DEFAULT_CONVERSATIONS;
+  let tasks = readJSON(STORAGE_KEYS.tasks, null) || DEFAULT_TASKS;
+  let conversations = readJSON(STORAGE_KEYS.messages, null) || DEFAULT_CONVERSATIONS;
   let activeConversation = 'groupsync';
   let activeGroup = 'groupsync';
   let score = Number(localStorage.getItem(STORAGE_KEYS.score) || 8);
   let recentlyDeletedTask = null;
   let editingTaskId = null;
-  let readTaskNotificationIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.notifRead) || '[]');
-  let chatReadState = JSON.parse(localStorage.getItem(STORAGE_KEYS.chatRead) || '{}');
+  let readTaskNotificationIds = readJSON(STORAGE_KEYS.notifRead, []);
+  let chatReadState = readJSON(STORAGE_KEYS.chatRead, {});
   const GROUP_LABELS = { groupsync: 'GroupSync Team', market: 'Market Analysis', gamedesign: 'Game Design Crew' };
+
+  function readJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
 
   function smoothScroll(id) { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
   function openApp() { document.getElementById('landing').style.display = 'none'; document.getElementById('app').style.display = 'block'; }
@@ -2089,16 +2098,20 @@
   function updateSidebarBadges() {
     const pendingTasksCount = tasks.filter(t => !t.done).length;
     const taskBadge = document.getElementById('tasks-nav-badge');
-    taskBadge.textContent = String(pendingTasksCount);
-    taskBadge.style.display = pendingTasksCount ? 'inline-flex' : 'none';
+    if (taskBadge) {
+      taskBadge.textContent = String(pendingTasksCount);
+      taskBadge.style.display = pendingTasksCount ? 'inline-flex' : 'none';
+    }
 
     const totalUnreadChat = Object.entries(conversations).reduce((sum, [id, convo]) => {
       const readCount = Number(chatReadState[id] || 0);
       return sum + Math.max(0, convo.messages.length - readCount);
     }, 0);
     const chatBadge = document.getElementById('chat-nav-badge');
-    chatBadge.textContent = String(totalUnreadChat);
-    chatBadge.style.display = totalUnreadChat ? 'inline-flex' : 'none';
+    if (chatBadge) {
+      chatBadge.textContent = String(totalUnreadChat);
+      chatBadge.style.display = totalUnreadChat ? 'inline-flex' : 'none';
+    }
   }
 
   function updateDashboardMetrics() {
