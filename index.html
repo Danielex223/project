@@ -1592,68 +1592,7 @@
                 <div class="card-title">My Tasks</div>
                 <div class="card-action" onclick="showPage('tasks', null)">View all →</div>
               </div>
-              <div class="task-list" id="dashboard-task-list">
-                <div class="task-item">
-                  <div class="priority priority-high"></div>
-                  <div class="task-checkbox" onclick="toggleTask(this)"></div>
-                  <div class="task-content">
-                    <div class="task-name">Finalize usability test report</div>
-                    <div class="task-meta">
-                      <span class="task-due overdue">Due May 5</span>
-                      <span class="tag tag-research">Research</span>
-                    </div>
-                  </div>
-                  <div class="task-assignee"><div class="avatar-sm" style="background:#3d6bff">D</div></div>
-                </div>
-                <div class="task-item">
-                  <div class="priority priority-high"></div>
-                  <div class="task-checkbox" onclick="toggleTask(this)"></div>
-                  <div class="task-content">
-                    <div class="task-name">Annotate wireframes with HCI principles</div>
-                    <div class="task-meta">
-                      <span class="task-due">Due May 7</span>
-                      <span class="tag tag-design">Design</span>
-                    </div>
-                  </div>
-                  <div class="task-assignee"><div class="avatar-sm" style="background:#3d6bff">D</div></div>
-                </div>
-                <div class="task-item">
-                  <div class="priority priority-med"></div>
-                  <div class="task-checkbox" onclick="toggleTask(this)"></div>
-                  <div class="task-content">
-                    <div class="task-name">Draft final report intro section</div>
-                    <div class="task-meta">
-                      <span class="task-due">Due May 10</span>
-                      <span class="tag tag-writing">Writing</span>
-                    </div>
-                  </div>
-                  <div class="task-assignee"><div class="avatar-sm" style="background:#3d6bff">D</div></div>
-                </div>
-                <div class="task-item">
-                  <div class="priority priority-low"></div>
-                  <div class="task-checkbox done" onclick="toggleTask(this)">✓</div>
-                  <div class="task-content">
-                    <div class="task-name done">Conduct user interviews (5 participants)</div>
-                    <div class="task-meta">
-                      <span class="task-due">Completed Apr 28</span>
-                      <span class="tag tag-research">Research</span>
-                    </div>
-                  </div>
-                  <div class="task-assignee"><div class="avatar-sm" style="background:#3d6bff">D</div></div>
-                </div>
-                <div class="task-item">
-                  <div class="priority priority-low"></div>
-                  <div class="task-checkbox done" onclick="toggleTask(this)">✓</div>
-                  <div class="task-content">
-                    <div class="task-name done">Create low-fidelity wireframes</div>
-                    <div class="task-meta">
-                      <span class="task-due">Completed Apr 22</span>
-                      <span class="tag tag-design">Design</span>
-                    </div>
-                  </div>
-                  <div class="task-assignee"><div class="avatar-sm" style="background:#f59e0b">M</div></div>
-                </div>
-              </div>
+              <div class="task-list" id="dashboard-task-list"></div>
             </div>
           </div>
 
@@ -1770,10 +1709,10 @@
         </div>
         <div class="card">
           <div class="card-header">
-            <div style="display:flex;gap:8px;">
-              <span class="chip chip-red">High Priority (2)</span>
-              <span class="chip chip-amber">Medium (3)</span>
-              <span class="chip chip-green">Low (2)</span>
+            <div style="display:flex;gap:8px;" id="priority-chips">
+              <span class="chip chip-red" id="chip-high">High Priority (0)</span>
+              <span class="chip chip-amber" id="chip-med">Medium (0)</span>
+              <span class="chip chip-green" id="chip-low">Low (0)</span>
             </div>
           </div>
           <div class="task-list" id="tasks-page-list">
@@ -1831,10 +1770,11 @@
           <div class="chat-main">
             <div style="padding:12px 20px;border-bottom:1px solid var(--border);background:#fff;display:flex;align-items:center;gap:10px;">
               <div style="font-size:20px;" id="chat-header-icon">🖥️</div>
-              <div>
+              <div style="flex:1;">
                 <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;" id="chat-header-name">GroupSync Team</div>
                 <div style="font-size:11px;color:var(--muted);" id="chat-header-meta">4 members · GAME 324.101</div>
               </div>
+              <button class="btn btn-outline" style="padding:6px 14px;font-size:12px;" onclick="inviteToGroup()">+ Invite</button>
             </div>
             <div class="chat-messages" id="chat-messages">
             </div>
@@ -1958,7 +1898,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score', notifRead: 'groupsync.notifRead', chatRead: 'groupsync.chatRead' };
+  const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score', notifRead: 'groupsync.notifRead', chatRead: 'groupsync.chatRead', version: 'groupsync.version' };
+  const APP_VERSION = '2.1';
+  // Clear stale localStorage if version mismatch
+  if (localStorage.getItem(STORAGE_KEYS.version) !== APP_VERSION) {
+    Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+    localStorage.setItem(STORAGE_KEYS.version, APP_VERSION);
+  }
   const SCORE_WEIGHTS = { create: 2, complete: 3, message: 1 };
   const TODAY = new Date('2026-05-04T00:00:00');
   const DAY_MS = 24 * 60 * 60 * 1000;
@@ -2016,6 +1962,7 @@
       readTaskNotificationIds = tasks.filter(t => !t.done).map(t => t.id);
       if (name === 'chat') {
         chatReadState[activeConversation] = conversations[activeConversation]?.messages?.length || 0;
+        renderMessages();
       }
       saveState();
     }
@@ -2032,6 +1979,7 @@
     localStorage.setItem(STORAGE_KEYS.score, String(score));
     localStorage.setItem(STORAGE_KEYS.notifRead, JSON.stringify(readTaskNotificationIds));
     localStorage.setItem(STORAGE_KEYS.chatRead, JSON.stringify(chatReadState));
+    localStorage.setItem(STORAGE_KEYS.version, APP_VERSION);
   }
   function getTaskDueState(task) {
     if (task.done) return { label: `Completed ${new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, className: '' };
@@ -2132,11 +2080,7 @@
 
   function renderTasks() {
     const activeTasks = tasks.filter(t => !t.done).length;
-    if (!activeTasks) {
-      const doneOnly = '<div style="padding:24px;color:var(--muted);font-size:13px;text-align:center;">🎉 All tasks are complete. Add a new task to keep momentum going.</div>';
-      document.getElementById('dashboard-task-list').innerHTML = doneOnly;
-      document.getElementById('tasks-page-list').innerHTML = doneOnly;
-    }
+    const doneOnly = '<div style="padding:24px;color:var(--muted);font-size:13px;text-align:center;">🎉 All tasks are complete. Add a new task to keep momentum going.</div>';
     const markup = tasks.map(task => `<div class="task-item">
       <div class="priority priority-${task.priority}"></div>
       <div class="task-checkbox ${task.done ? 'done' : ''}" onclick="toggleTask(${task.id})">${task.done ? '✓' : ''}</div>
@@ -2146,8 +2090,20 @@
       </div>
       <div style="display:flex;align-items:center;gap:8px;"><div class="task-assignee"><div class="avatar-sm" style="background:${task.color}">${task.assignee}</div></div><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="openEditTaskModal(${task.id})">Edit</button><button class="btn btn-ghost" style="padding:4px 8px;font-size:11px;" onclick="deleteTask(${task.id})">Delete</button></div>
     </div>`).join('');
-    if (activeTasks) { document.getElementById('dashboard-task-list').innerHTML = markup;
-    document.getElementById('tasks-page-list').innerHTML = markup; }
+    document.getElementById('dashboard-task-list').innerHTML = activeTasks ? markup : doneOnly;
+    document.getElementById('tasks-page-list').innerHTML = markup || doneOnly;
+
+    // Update priority chips dynamically
+    const highCount = tasks.filter(t => t.priority === 'high').length;
+    const medCount  = tasks.filter(t => t.priority === 'med').length;
+    const lowCount  = tasks.filter(t => t.priority === 'low').length;
+    const chipHigh = document.getElementById('chip-high');
+    const chipMed  = document.getElementById('chip-med');
+    const chipLow  = document.getElementById('chip-low');
+    if (chipHigh) chipHigh.textContent = `High Priority (${highCount})`;
+    if (chipMed)  chipMed.textContent  = `Medium (${medCount})`;
+    if (chipLow)  chipLow.textContent  = `Low (${lowCount})`;
+
     updateContributionUI();
     renderDeadlines();
     updateDashboardMetrics();
