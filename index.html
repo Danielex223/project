@@ -1518,7 +1518,7 @@
         </div>
         <div class="nav-item" onclick="showPage('tasks', this)">
           <span class="nav-icon">✅</span> Tasks
-          <span class="nav-badge">3</span>
+          <span class="nav-badge" id="tasks-nav-badge">0</span>
         </div>
         <div class="nav-item" onclick="showPage('deadlines', this)">
           <span class="nav-icon">📅</span> Deadlines
@@ -1526,7 +1526,7 @@
         <div class="nav-section-label">Collaboration</div>
         <div class="nav-item" onclick="showPage('chat', this)">
           <span class="nav-icon">💬</span> Group Chat
-          <span class="nav-badge">2</span>
+          <span class="nav-badge" id="chat-nav-badge">0</span>
         </div>
         <div class="nav-item" onclick="showPage('contributions', this)">
           <span class="nav-icon">⚖️</span> Contributions
@@ -1956,6 +1956,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score', notifRead: 'groupsync.notifRead', chatRead: 'groupsync.chatRead' };
   const STORAGE_KEYS = { tasks: 'groupsync.tasks', messages: 'groupsync.messages', score: 'groupsync.score', notifRead: 'groupsync.notifRead' };
   const SCORE_WEIGHTS = { create: 2, complete: 3, message: 1 };
   const TODAY = new Date('2026-05-04T00:00:00');
@@ -1989,6 +1990,7 @@
   let recentlyDeletedTask = null;
   let editingTaskId = null;
   let readTaskNotificationIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.notifRead) || '[]');
+  let chatReadState = JSON.parse(localStorage.getItem(STORAGE_KEYS.chatRead) || '{}');
   const GROUP_LABELS = { groupsync: 'GroupSync Team', market: 'Market Analysis', gamedesign: 'Game Design Crew' };
 
   function smoothScroll(id) { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
@@ -2001,6 +2003,9 @@
     document.getElementById('page-' + name).classList.add('active');
     if (name === 'tasks' || name === 'chat') {
       readTaskNotificationIds = tasks.filter(t => !t.done).map(t => t.id);
+      if (name === 'chat') {
+        chatReadState[activeConversation] = conversations[activeConversation]?.messages?.length || 0;
+      }
       saveState();
     }
     if (el) el.classList.add('active');
@@ -2015,6 +2020,7 @@
     localStorage.setItem(STORAGE_KEYS.messages, JSON.stringify(conversations));
     localStorage.setItem(STORAGE_KEYS.score, String(score));
     localStorage.setItem(STORAGE_KEYS.notifRead, JSON.stringify(readTaskNotificationIds));
+    localStorage.setItem(STORAGE_KEYS.chatRead, JSON.stringify(chatReadState));
   }
   function getTaskDueState(task) {
     if (task.done) return { label: `Completed ${new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`, className: '' };
@@ -2069,6 +2075,7 @@
     }).join('');
     document.getElementById('notif-list').innerHTML = items || '<div class="notif-item"><div class="notif-item-body">No pending notifications.</div></div>';
     document.getElementById('notif-count').textContent = String(pendingTasks.length);
+    updateSidebarBadges();
   }
 
   function markAllRead() {
@@ -2077,6 +2084,21 @@
     saveState();
     renderNotifications();
     showToast('✅ Notifications marked as read');
+  }
+
+  function updateSidebarBadges() {
+    const pendingTasksCount = tasks.filter(t => !t.done).length;
+    const taskBadge = document.getElementById('tasks-nav-badge');
+    taskBadge.textContent = String(pendingTasksCount);
+    taskBadge.style.display = pendingTasksCount ? 'inline-flex' : 'none';
+
+    const totalUnreadChat = Object.entries(conversations).reduce((sum, [id, convo]) => {
+      const readCount = Number(chatReadState[id] || 0);
+      return sum + Math.max(0, convo.messages.length - readCount);
+    }, 0);
+    const chatBadge = document.getElementById('chat-nav-badge');
+    chatBadge.textContent = String(totalUnreadChat);
+    chatBadge.style.display = totalUnreadChat ? 'inline-flex' : 'none';
   }
 
   function updateDashboardMetrics() {
@@ -2235,6 +2257,7 @@
     activeGroup = conversationId;
     document.querySelectorAll('.chat-conv-item').forEach(item => item.classList.remove('active'));
     if (el) el.classList.add('active');
+    chatReadState[activeConversation] = conversations[activeConversation]?.messages?.length || 0;
     renderMessages();
     renderTasks();
   }
@@ -2272,7 +2295,9 @@
     const msgs = document.getElementById('chat-messages');
     msgs.insertAdjacentHTML('beforeend', html);
     conversations[activeConversation].messages = Array.from(msgs.children).map(n => n.outerHTML);
-    score += SCORE_WEIGHTS.message; saveState(); updateContributionUI();
+    score += SCORE_WEIGHTS.message;
+    chatReadState[activeConversation] = conversations[activeConversation].messages.length;
+    saveState(); updateContributionUI();
     input.value = ''; msgs.scrollTop = msgs.scrollHeight;
   }
   function inviteToGroup() {
