@@ -1889,11 +1889,13 @@
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Assign To</label>
-        <select class="form-select">
-          <option>Daniel (Me)</option>
-          <option>Maya</option>
-          <option>James</option>
-          <option>Aisha</option>
+        <select class="form-select" id="task-assignee">
+          <option value="D" data-color="#3d6bff">Daniel (Me)</option>
+          <option value="M" data-color="#f59e0b">Maya</option>
+          <option value="J" data-color="#1db877">James</option>
+          <option value="A" data-color="#ef4444">Aisha</option>
+          <option value="K" data-color="#8b5cf6">Kira</option>
+          <option value="R" data-color="#10b981">Ruben</option>
         </select>
       </div>
       <div class="form-group">
@@ -2193,12 +2195,13 @@
       return acc;
     }, {});
     const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+    const MEMBER_NAMES = { D: 'Daniel (You)', M: 'Maya', J: 'James', A: 'Aisha', K: 'Kira', R: 'Ruben', S: 'Sam' };
     const rows = Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .map(([assignee, count]) => {
         const share = Math.round((count / total) * 100);
         const color = tasks.find(t => t.assignee === assignee)?.color || '#6b7280';
-        const name = assignee === 'D' ? 'Daniel (You)' : `Member ${assignee}`;
+        const name = MEMBER_NAMES[assignee] || `Member ${assignee}`;
         return `<div class="contrib-bar">
           <div class="avatar-sm" style="background:${color};flex-shrink:0">${assignee}</div>
           <div class="contrib-name">${name}</div>
@@ -2228,6 +2231,8 @@
     document.getElementById('task-due-date').value = '2026-05-10';
     document.getElementById('task-tag').value = 'Research';
     document.getElementById('task-priority').value = 'med';
+    const assigneeEl = document.getElementById('task-assignee');
+    if (assigneeEl) assigneeEl.value = 'D';
     document.getElementById('task-modal').classList.add('show');
     const groupSelect = document.getElementById('task-group');
     if (groupSelect) groupSelect.value = activeGroup;
@@ -2242,12 +2247,18 @@
     const priority = document.getElementById('task-priority')?.value || 'med';
     if (editingTaskId) {
       const task = tasks.find(t => t.id === editingTaskId);
-      if (task) Object.assign(task, { name, groupId: selectedGroupId, dueDate, tag, priority });
+      const editAssigneeSelect = document.getElementById('task-assignee');
+      const editAssignee = editAssigneeSelect?.value || task.assignee || 'D';
+      const editColor = editAssigneeSelect?.options[editAssigneeSelect.selectedIndex]?.dataset.color || task.color || '#3d6bff';
+      if (task) Object.assign(task, { name, groupId: selectedGroupId, dueDate, tag, priority, assignee: editAssignee, color: editColor });
       editingTaskId = null;
       saveState(); renderTasks(); closeModal(); showToast('✏️ Task updated');
       return;
     }
-    const newTask = { id: Date.now(), groupId: selectedGroupId, name, dueDate, tag, priority, done: false, assignee: 'D', color: '#3d6bff' };
+    const assigneeSelect = document.getElementById('task-assignee');
+    const assignee = assigneeSelect?.value || 'D';
+    const color = assigneeSelect?.options[assigneeSelect.selectedIndex]?.dataset.color || '#3d6bff';
+    const newTask = { id: Date.now(), groupId: selectedGroupId, name, dueDate, tag, priority, done: false, assignee, color };
     tasks.unshift(newTask);
     readTaskNotificationIds = readTaskNotificationIds.filter(id => id !== newTask.id);
     score += SCORE_WEIGHTS.create;
@@ -2340,6 +2351,8 @@
     document.getElementById('task-due-date').value = task.dueDate;
     document.getElementById('task-tag').value = task.tag;
     document.getElementById('task-priority').value = task.priority;
+    const assigneeSelect = document.getElementById('task-assignee');
+    if (assigneeSelect) assigneeSelect.value = task.assignee || 'D';
     document.querySelector('#task-modal .modal-title').textContent = 'Edit Task';
     document.querySelector('#task-modal .btn.btn-primary').textContent = 'Save Changes';
     document.getElementById('task-modal').classList.add('show');
